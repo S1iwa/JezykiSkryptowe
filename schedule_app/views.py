@@ -1,11 +1,14 @@
 import json
 from django.shortcuts import render
 from django.contrib.auth.hashers import check_password
+from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
 
 # Create your views here.
+
+#Login button
 @csrf_exempt
 def api_login(request):
     if request.method != 'POST':
@@ -62,3 +65,17 @@ def api_login(request):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Błąd serwera: {str(e)}'}, status=500)
+
+# Logout button
+@csrf_exempt
+def api_logout(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+    # Funkcja logout usuwa aktualną sesję z Django
+    logout(request)
+
+    return JsonResponse({
+        'status': 'success',
+        'message': 'Wylogowano pomyślnie'
+    })
