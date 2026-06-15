@@ -32,9 +32,9 @@ def api_login(request):
 
         #   Jeśli to nie student, szukamy w tabeli Pracownicy
         pracownik = Pracownicy.objects.filter(email=email_input).first()
-        if pracownik and password_input == pracownik.haslo:
+        if pracownik and check_password(password_input, pracownik.haslo):
             # Sprawdzamy wartość w kolumnie 'role' (wykladowca / planista)
-            rola_pracownika = pracownik.role.lower()  # Zabezpieczenie przed wielkimi literami
+            rola_pracownika = pracownik.rola.lower()  # Zabezpieczenie przed wielkimi literami
 
             if rola_pracownika == 'wykladowca':
                 return JsonResponse({
