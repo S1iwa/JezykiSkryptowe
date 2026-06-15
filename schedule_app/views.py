@@ -1,12 +1,12 @@
 import json
 from django.shortcuts import render
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
 
-# Create your views here.
+#For all buttons
 
 #Login button
 @csrf_exempt
@@ -26,6 +26,10 @@ def api_login(request):
         #   Szukamy najpierw w tabeli Studenci
         student = Studenci.objects.filter(email=email_input).first()
         if student and check_password(password_input, student.haslo):
+
+            request.session['zalogowany_email'] = Studenci.email
+            request.session['zalogowana_rola'] = "student"
+
             return JsonResponse({
                 'status': 'success',
                 'role': 'student',
@@ -38,6 +42,9 @@ def api_login(request):
         if pracownik and check_password(password_input, pracownik.haslo):
             # Sprawdzamy wartość w kolumnie 'role' (wykladowca / planista)
             rola_pracownika = pracownik.rola.lower()  # Zabezpieczenie przed wielkimi literami
+
+            request.session['zalogowany_email'] = pracownik.email
+            request.session['zalogowana_rola'] = rola_pracownika
 
             if rola_pracownika == 'wykladowca':
                 return JsonResponse({
@@ -79,3 +86,38 @@ def api_logout(request):
         'status': 'success',
         'message': 'Wylogowano pomyślnie'
     })
+
+# Change Password Button
+@csrf_exempt
+def api_change_password(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+    email_z_sesji = request.session.get('zalogowany_email')
+    rola_z_sesji = request.session.get('zalogowana_rola')
+
+    if not email_z_sesji or not rola_z_sesji:
+        return JsonResponse({'status': 'error', 'message': 'Musisz być zalogowany, aby zmienić hasło'}, status=401)
+
+    data = json.loads(request.body)
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+
+    # SPRAWDZAMY ROLĘ I WYBIERAMY ODPOWIEDNI MODEL
+    if rola_z_sesji == 'student':
+        uzytkownik = Studenci.objects.filter(email=email_z_sesji).first()
+    else:
+        # Skoro nie student, to pracownik (planista, wykladowca, admin)
+        uzytkownik = Pracownicy.objects.filter(email=email_z_sesji).first()
+
+    if not uzytkownik:
+        return JsonResponse({'status': 'error', 'message': 'Użytkownik nie istnieje'}, status=404)
+
+    # Dalej kod jest identyczny dla obu ról!
+    if not check_password(old_password, uzytkownik.haslo):
+        return JsonResponse({'status': 'error', 'message': 'Obecne hasło jest niepoprawne'}, status=403)
+
+    uzytkownik.haslo = make_password(new_password)
+    uzytkownik.save()
+
+    return JsonResponse({'status': 'success', 'message': 'Hasło zostało pomyślnie zmienione'})
