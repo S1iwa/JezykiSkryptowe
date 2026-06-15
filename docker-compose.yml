@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16
+    container_name: schedule_db
+    environment:
+      POSTGRES_DB: plan_zajec
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    restart: always
+
+  web:
+    build: .
+    container_name: schedule_web
+    command: >
+      bash -c "sleep 5 && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=plan_zajec
+      - DB_USER=postgres
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-admin}
+      - SECRET_KEY=django-insecure-example-key
+
+volumes:
+  pgdata:
