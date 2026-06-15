@@ -6,7 +6,92 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
 
-#For all buttons
+# Funkcje pomocnicze – pobierają plan zajęć
+
+def _serializuj_zajecia(z):
+    """Zamienia obiekt Zajecia na słownik gotowy do JSON."""
+    sala    = z.ids
+    budynek = sala.idb
+    przed   = z.idp
+    prow    = z.idpr
+    grupa   = z.idg
+    kier    = grupa.idk
+
+    return {
+        'idz':      z.idz,
+        'dzien':    z.dzien,
+        'godzrozp': z.godzrozp.strftime('%H:%M'),
+        'godzzak':  z.godzzak.strftime('%H:%M'),
+        'uwagi':    z.uwagi or '',
+        # sala
+        'sala': {
+            'numers':    sala.numers,
+            'typs':      sala.typs,
+            'pojemnosc': sala.pojemnosc,
+            'budynek': {
+                'nazwab': budynek.nazwab,
+                'adresb': budynek.adresb,
+            },
+        },
+        # przedmiot
+        'przedmiot': {
+            'nazwap': przed.nazwap,
+            'formap': przed.formap,
+            'lbgodz': przed.lbgodz,
+        },
+        # prowadzący
+        'prowadzacy': {
+            'stopien':  prow.stopien or '',
+            'imie':     prow.imie,
+            'nazwisko': prow.nazwisko,
+            'email':    prow.email,
+        },
+        # kierunek / grupa
+        'kierunek': {
+            'nazwak':      kier.nazwak,
+            'rokstudiow':  grupa.rokstudiow,
+            'semestr':     grupa.semestr,
+            'rokakadem':   grupa.rokakadem,
+        },
+    }
+
+
+def _plan_studenta(student):
+    """
+    Zwraca plan zajęć studenta posortowany wg dnia i godziny.
+    Student może należeć do wielu grup (tabela Przypisy).
+    """
+    # Pobieramy wszystkie grupy studenta
+    przypisy = (
+        Przypisy.objects
+        .filter(idst=student)
+        .select_related('idg')
+    )
+    grupy_ids = [p.idg_id for p in przypisy]
+
+    # Pobieramy zajęcia tych grup z wszystkimi powiązanymi danymi jednym zapytaniem
+    zajecia_qs = (
+        Zajecia.objects
+        .filter(idg__in=grupy_ids)
+        .select_related('ids', 'ids__idb', 'idp', 'idpr', 'idg', 'idg__idk')
+        .order_by('dzien', 'godzrozp')
+    )
+
+    return [_serializuj_zajecia(z) for z in zajecia_qs]
+
+
+def _plan_wykladowcy(pracownik):
+    """
+    Zwraca plan zajęć wykładowcy posortowany wg dnia i godziny.
+    """
+    zajecia_qs = (
+        Zajecia.objects
+        .filter(idpr=pracownik)
+        .select_related('ids', 'ids__idb', 'idp', 'idpr', 'idg', 'idg__idk')
+        .order_by('dzien', 'godzrozp')
+    )
+
+    return [_serializuj_zajecia(z) for z in zajecia_qs]
 
 #Login button
 @csrf_exempt
@@ -27,14 +112,15 @@ def api_login(request):
         student = Studenci.objects.filter(email=email_input).first()
         if student and check_password(password_input, student.haslo):
 
-            request.session['zalogowany_email'] = student.email  # BUG FIX: bylo Studenci.email (klasa), teraz student.email (instancja)
+            request.session['zalogowany_email'] = student.email
             request.session['zalogowana_rola'] = "student"
 
             return JsonResponse({
                 'status': 'success',
                 'role': 'student',
                 'redirect_to': '/panel-studenta',
-                'user_info': {'email': student.email}
+                'user_info': {'email': student.email},
+                'plan_zajec': _plan_studenta(student),
             })
 
         #   Jeśli to nie student, szukamy w tabeli Pracownicy
@@ -51,14 +137,15 @@ def api_login(request):
                     'status': 'success',
                     'role': 'wykladowca',
                     'redirect_to': '/panel-wykladowcy',
-                    'user_info': {'email': pracownik.email}
+                    'user_info': {'email': pracownik.email},
+                    'plan_zajec': _plan_wykladowcy(pracownik),
                 })
             elif rola_pracownika == 'planista':
                 return JsonResponse({
                     'status': 'success',
                     'role': 'planista',
                     'redirect_to': '/panel-planisty',
-                    'user_info': {'email': pracownik.email}
+                    'user_info': {'email': pracownik.email},
                 })
             else:
                 # Użytkownik jest w tabeli pracownicy, ale ma nieznaną rolę
@@ -171,6 +258,78 @@ def api_find_the_audience(request):
             wynik.append(dane_sali)
 
         return JsonResponse({'status': 'success', 'sale': wynik})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Błąd serwera: {str(e)}'}, status=500)
+
+
+# Student
+@csrf_exempt
+def api_professors_information(request):
+    if request.method != 'GET':
+        return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+    # Tylko zalogowany student ma dostęp
+    rola_z_sesji = request.session.get('zalogowana_rola')
+    if not rola_z_sesji:
+        return JsonResponse({'status': 'error', 'message': 'Musisz być zalogowany'}, status=401)
+    if rola_z_sesji != 'student':
+        return JsonResponse({'status': 'error', 'message': 'Brak uprawnień – tylko dla studentów'}, status=403)
+
+    try:
+        nazwisko_param = request.GET.get('nazwisko', '').strip()
+        imie_param = request.GET.get('imie', '').strip()
+
+        # Wymagany co najmniej jeden parametr wyszukiwania
+        if not nazwisko_param and not imie_param:
+            return JsonResponse(
+                {'status': 'error', 'message': 'Podaj co najmniej imię lub nazwisko prowadzącego'},
+                status=400
+            )
+
+        # Szukamy tylko wśród pracowników z rolą wykładowcy (iexact = ignoruj wielkość liter)
+        pracownicy_qs = Pracownicy.objects.filter(rola__iexact='wykladowca')
+
+        if nazwisko_param:
+            pracownicy_qs = pracownicy_qs.filter(nazwisko__icontains=nazwisko_param)
+        if imie_param:
+            pracownicy_qs = pracownicy_qs.filter(imie__icontains=imie_param)
+
+        if not pracownicy_qs.exists():
+            return JsonResponse(
+                {'status': 'error', 'message': 'Nie znaleziono prowadzącego o podanych danych'},
+                status=404
+            )
+
+        wynik = []
+        for pracownik in pracownicy_qs:
+            # Pobieramy wszystkie zajęcia prowadzone przez tego pracownika
+            # i zbieramy unikalne przedmioty (po idp) z ich formą zajęć
+            zajecia = (
+                Zajecia.objects
+                .filter(idpr=pracownik)
+                .select_related('idp')
+                .values('idp__nazwap', 'idp__formap')
+                .distinct()
+            )
+
+            przedmioty = [
+                {
+                    'nazwap': z['idp__nazwap'],
+                    'formap': z['idp__formap'],
+                }
+                for z in zajecia
+            ]
+
+            wynik.append({
+                'stopien': pracownik.stopien or '',
+                'imie': pracownik.imie,
+                'nazwisko': pracownik.nazwisko,
+                'email': pracownik.email,
+                'przedmioty': przedmioty,
+            })
+
+        return JsonResponse({'status': 'success', 'prowadzacy': wynik})
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Błąd serwera: {str(e)}'}, status=500)
