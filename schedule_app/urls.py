@@ -2,6 +2,14 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Strona główna SPA:
+    path('', views.index, name='index'),
+    path('logowanie/', views.index, name='logowanie'),
+    path('panel-studenta/', views.index, name='panel_studenta'),
+    path('panel-wykladowcy/', views.index, name='panel_wykladowcy'),
+    path('panel-planisty/', views.index, name='panel_planisty'),
+
+    # API:
     path('api/auth/login/', views.api_login, name='api_login'),
     path('api/auth/logout/', views.api_logout, name='api_logout'),
     path('api/auth/change_password/', views.api_change_password, name='api_change_password'),
@@ -23,4 +31,7 @@ urlpatterns = [
     path('api/accounts/manage/<str:typ_konta>/<int:konto_id>/', views.api_add_delete_account, name='api_add_delete_account_delete'),
     path('api/reports/rooms-load/', views.api_raport_obciazenia_sal, name='api_raport_obciazenia_sal'),
     path('api/reports/lecturers-load/', views.api_raport_obciazenia_wykladowcow, name='api_raport_obciazenia_wykladowcow'),
+
+    path('api/CRUD/budynek/', views.api_get_budynki, name='api_get_budynki'),
+    path('api/CRUD/kierunek/', views.api_get_kierunki, name='api_get_kierunki'),
 ]
