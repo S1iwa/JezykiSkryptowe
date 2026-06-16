@@ -927,3 +927,8 @@ def api_add_delete_account(request, typ_konta=None, konto_id=None):
 
     return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
 
+
+
+# Funkcja łącząca Django z index.html
+def index(request):
+    return render(request, 'schedule_app/index.html')
