@@ -22,19 +22,21 @@ function toggleMotyw() {
 // Funkcja pokazLogowanie - Strona logowania
 function pokazLogowanie(app) {
     app.innerHTML = `
-        <div class="formularz-logowania">
-            <h2>Logowanie</h2>
-            <p>Jeden formularz dla studenta, wykładowcy i planisty.</p>
-            <div id="blad-logowania" class="blad hidden"></div>
-            <div class="pole">
-                <label for="pole-email">E-mail</label>
-                <input type="email" id="pole-email" placeholder="np. j.kowalski@student.pl">
+        <div class="login-wrapper">
+            <div class="formularz-logowania">
+                <h2>Logowanie</h2>
+                <p class="login-podtytul">Jeden formularz dla studenta, wykładowcy i planisty.</p>
+                <div id="blad-logowania" class="blad hidden"></div>
+                <div class="pole">
+                    <label for="pole-email">E-mail</label>
+                    <input type="email" id="pole-email" placeholder="np. j.kowalski@student.pl">
+                </div>
+                <div class="pole">
+                    <label for="pole-haslo">Hasło</label>
+                    <input type="password" id="pole-haslo" placeholder="hasło">
+                </div>
+                <button id="przycisk-login">Zaloguj się</button>
             </div>
-            <div class="pole">
-                <label for="pole-haslo">Hasło</label>
-                <input type="password" id="pole-haslo" placeholder="hasło">
-            </div>
-            <button id="przycisk-login">Zaloguj się</button>
         </div>
     `;
 
