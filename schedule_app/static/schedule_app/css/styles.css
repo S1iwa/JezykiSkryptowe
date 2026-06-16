@@ -1,9 +1,89 @@
-.formularz-logowania {
-    max-width: 400px;
-    margin: 80px auto;
-    padding: 32px;
+body {
+    background-color: #f5f5f5;
+    color: #111;
+    font-family: 'Inter', sans-serif;
+}
+
+body.dark {
+    background-color: #1a1a1a;
+    color: #e8e8e8;
+}
+
+.przycisk-motywu {
+    position: fixed;
+    top: 14px;
+    right: 16px;
+    z-index: 999;
+    width: auto;
+    padding: 6px 14px;
+    background: #e5e7eb;
+    color: #111;
     border: 1px solid #ccc;
-    border-radius: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+}
+
+body.dark .przycisk-motywu {
+    background: #333;
+    color: #e8e8e8;
+    border-color: #555;
+}
+
+.przycisk-motywu:hover {
+    background: #d1d5db;
+}
+
+body.dark .przycisk-motywu:hover {
+    background: #444;
+}
+
+/* Karty i kontenery */
+body.dark .formularz-logowania {
+    background-color: #242424;
+    border-color: #444;
+}
+
+body.dark .panel-naglowek {
+    border-bottom-color: #444;
+}
+
+body.dark .tabela-planu th {
+    background-color: #2a2a2a;
+    color: #e8e8e8;
+}
+
+body.dark .tabela-planu th,
+body.dark .tabela-planu td {
+    border-bottom-color: #444;
+}
+
+body.dark .tabela-planu tr:hover {
+    background-color: #2e2e2e;
+}
+
+body.dark .ukryta-sekcja {
+    background-color: #2a2a2a;
+    border-color: #444;
+}
+
+body.dark input[type="email"],
+body.dark input[type="password"],
+body.dark input[type="text"] {
+    background-color: #2a2a2a;
+    color: #e8e8e8;
+    border-color: #555;
+}
+
+.formularz-logowania {
+    max-width: 380px;
+    margin: 80px auto;
+    padding: 36px 32px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 .pole {
     margin-bottom: 16px;
