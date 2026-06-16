@@ -876,9 +876,9 @@ def api_add_delete_account(request, typ_konta=None, konto_id=None):
 
         if typ_konta_post == 'student':
             wymagane = ['nazwisko', 'imie', 'status']
-            brakujące = [pole for pole in wymagane if not data.get(pole)]
-            if brakujące:
-                return JsonResponse({'status': 'error', 'message': f'Brakujące pola dla studenta: {", ".join(brakujące)}'}, status=400)
+            brakujace = [pole for pole in wymagane if not data.get(pole)]
+            if brakujace:
+                return JsonResponse({'status': 'error', 'message': f'Brakujące pola dla studenta: {", ".join(brakujace)}'}, status=400)
 
             nowy = Studenci.objects.create(
                 nazwisko=data.get('nazwisko'),
@@ -891,9 +891,9 @@ def api_add_delete_account(request, typ_konta=None, konto_id=None):
         
         elif typ_konta_post == 'pracownik':
             wymagane = ['nazwisko', 'imie', 'rola']
-            brakujące = [pole for pole in wymagane if not data.get(pole)]
-            if brakujące:
-                return JsonResponse({'status': 'error', 'message': f'Brakujące pola dla pracownika: {", ".join(brakujące)}'}, status=400)
+            brakujace = [pole for pole in wymagane if not data.get(pole)]
+            if brakujace:
+                return JsonResponse({'status': 'error', 'message': f'Brakujące pola dla pracownika: {", ".join(brakujace)}'}, status=400)
 
             nowy = Pracownicy.objects.create(
                 stopien=data.get('stopien', ''),
