@@ -45,9 +45,13 @@ docker-compose up -d
 ```
 
 > **Uwaga:** Flaga `-v` usuwa wolumen bazy danych — wszelkie zmiany wprowadzone ręcznie do bazy zostaną utracone i baza wróci do danych domyślnych.
+| Student    | `t.gasinski@student.pl`      |
 
 ## Zatrzymanie projektu
 
 ```bash
 docker-compose down
 ```
+```
+
+> **Uwaga:** Użycie `docker-compose down -v` usunie również bazę danych i wszystkie dane zostaną zresetowane do wartości domyślnych.

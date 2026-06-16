@@ -35,19 +35,20 @@ INSERT INTO Przedmioty (NazwaP, FormaP, LbGodz) VALUES
  ('Bezpieczeństwo systemów', 'wykład', 30);
 
 INSERT INTO Pracownicy (Stopien, Nazwisko, Imie, Email, NrTel, Haslo, Rola) VALUES
- ('', 'Kowalski', 'Adam', 'planista@uczelnia.pl', '500100200', 'hashed_admin_pw', 'PLANISTA'),
- ('dr', 'Nowak', 'Piotr', 'p.nowak@uczelnia.pl', '500200300', 'hashed_pw_nowak', 'WYKLADOWCA'),
- ('dr hab.','Wiśniewski', 'Anna', 'a.wisniewski@uczelnia.pl', '500300400', 'hashed_pw_wisn', 'WYKLADOWCA'),
- ('prof.', 'Zając', 'Marek', 'm.zajac@uczelnia.pl', '500400500', 'hashed_pw_zajac', 'WYKLADOWCA'),
- ('dr', 'Krawczyk', 'Elżbieta','e.krawczyk@uczelnia.pl', '500500600', 'hashed_pw_kraw', 'WYKLADOWCA');
+ ('', 'Kowalski', 'Adam', 'planista@uczelnia.pl', '500100200', 'pbkdf2_sha256$1200000$NW1LXTaX0qKhZfUqOnlEyH$BhGYDHD6dGg2bBwBQONIoTd/vvXXOj3tPbL84xPEjI4=', 'PLANISTA'),
+ ('dr', 'Nowak', 'Piotr', 'p.nowak@uczelnia.pl', '500200300', 'pbkdf2_sha256$1200000$NW1LXTaX0qKhZfUqOnlEyH$BhGYDHD6dGg2bBwBQONIoTd/vvXXOj3tPbL84xPEjI4=', 'WYKLADOWCA'),
+ ('dr hab.','Wiśniewski', 'Anna', 'a.wisniewski@uczelnia.pl', '500300400', 'pbkdf2_sha256$1200000$NW1LXTaX0qKhZfUqOnlEyH$BhGYDHD6dGg2bBwBQONIoTd/vvXXOj3tPbL84xPEjI4=', 'WYKLADOWCA'),
+ ('prof.', 'Zając', 'Marek', 'm.zajac@uczelnia.pl', '500400500', 'pbkdf2_sha256$1200000$NW1LXTaX0qKhZfUqOnlEyH$BhGYDHD6dGg2bBwBQONIoTd/vvXXOj3tPbL84xPEjI4=', 'WYKLADOWCA'),
+ ('dr', 'Krawczyk', 'Elżbieta','e.krawczyk@uczelnia.pl', '500500600', 'pbkdf2_sha256$1200000$NW1LXTaX0qKhZfUqOnlEyH$BhGYDHD6dGg2bBwBQONIoTd/vvXXOj3tPbL84xPEjI4=', 'WYKLADOWCA');
 
 INSERT INTO Studenci (Nazwisko, Imie, Status, Email, Haslo) VALUES
- ('Gasinski', 'Tomasz', 'aktywny', 't.gasinski@student.pl', 'hashed_st1'),
- ('Nikonenko', 'Vladyslav', 'aktywny', 'v.nikonenko@student.pl', 'hashed_st2'),
- ('Kowalczyk', 'Maria', 'aktywny', 'm.kowalczyk@student.pl', 'hashed_st3'),
- ('Lewandowski', 'Jan', 'aktywny', 'j.lewandowski@student.pl', 'hashed_st4'),
- ('Wójcik', 'Katarzyna', 'aktywny', 'k.wojcik@student.pl', 'hashed_st5'),
- ('Mazur', 'Paweł', 'urlopowany', 'p.mazur@student.pl', 'hashed_st6');
+ ('Gasinski', 'Tomasz', 'aktywny', 't.gasinski@student.pl', 'pbkdf2_sha256$1200000$NW1LXTaX0qKhZfUqOnlEyH$BhGYDHD6dGg2bBwBQONIoTd/vvXXOj3tPbL84xPEjI4='),
+ ('Nikonenko', 'Vladyslav', 'aktywny', 'v.nikonenko@student.pl', 'pbkdf2_sha256$1200000$NW1LXTaX0qKhZfUqOnlEyH$BhGYDHD6dGg2bBwBQONIoTd/vvXXOj3tPbL84xPEjI4='),
+ ('Kowalczyk', 'Maria', 'aktywny', 'm.kowalczyk@student.pl', 'pbkdf2_sha256$1200000$NW1LXTaX0qKhZfUqOnlEyH$BhGYDHD6dGg2bBwBQONIoTd/vvXXOj3tPbL84xPEjI4='),
+ ('Lewandowski', 'Jan', 'aktywny', 'j.lewandowski@student.pl', 'pbkdf2_sha256$1200000$NW1LXTaX0qKhZfUqOnlEyH$BhGYDHD6dGg2bBwBQONIoTd/vvXXOj3tPbL84xPEjI4='),
+ ('Wójcik', 'Katarzyna', 'aktywny', 'k.wojcik@student.pl', 'pbkdf2_sha256$1200000$NW1LXTaX0qKhZfUqOnlEyH$BhGYDHD6dGg2bBwBQONIoTd/vvXXOj3tPbL84xPEjI4='),
+ ('Mazur', 'Paweł', 'urlopowany', 'p.mazur@student.pl', 'pbkdf2_sha256$1200000$NW1LXTaX0qKhZfUqOnlEyH$BhGYDHD6dGg2bBwBQONIoTd/vvXXOj3tPbL84xPEjI4=');
+
 
 INSERT INTO Grupy (IdK, RokStudiow, Semestr, RokAkadem, LiczbaOs, Opis) VALUES
  (1, 2, 4, '2025/2026', 25, 'Informatyka – 2 rok, sem. letni, gr. A'),
