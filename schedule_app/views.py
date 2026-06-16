@@ -473,6 +473,14 @@ def api_CRUD_subject(request, przedmiot_id=None):
         return JsonResponse(
             {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać przedmiotami.'}, status=403)
 
+    # Pobranie danych
+    if request.method == 'GET':
+        przedmioty = Przedmioty.objects.all().values('idp', 'nazwap', 'formap', 'lbgodz')
+        # Frontend oczekuje klucza 'subjects' i pola 'id' lub 'id_przedmiotu'
+        lista = [{'id': p['idp'], 'nazwap': p['nazwap'], 'formap': p['formap'], 'lbgodz': p['lbgodz']} for p in
+                 przedmioty]
+        return JsonResponse({'status': 'success', 'subjects': lista})
+
     # DODAWANIE NOWEGO PRZEDMIOTU (POST)
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -534,6 +542,12 @@ def api_CRUD_sala(request, sala_id=None):
     if rola != 'planista':
         return JsonResponse(
             {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać salami.'}, status=403)
+
+    # Pobieranie danych
+    if request.method == 'GET':
+        sale = Sale.objects.all().values('ids', 'numers', 'typs', 'pojemnosc')
+        lista = [{'id': s['ids'], 'numers': s['numers'], 'typs': s['typs'], 'pojemnosc': s['pojemnosc']} for s in sale]
+        return JsonResponse({'status': 'success', 'sale': lista})
 
     # DODAWANIE NOWEJ SALI (POST)
     if request.method == 'POST':
@@ -620,6 +634,13 @@ def api_CRUD_pracownik(request, pracownik_id=None):
         return JsonResponse(
             {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać pracownikami.'}, status=403)
 
+    # Pobieranie danych
+    if request.method == 'GET':
+        pracownicy = Pracownicy.objects.all().values('idpr', 'stopien', 'imie', 'nazwisko', 'email', 'nrtel', 'rola')
+        lista = [{'id': p['idpr'], 'stopien': p['stopien'], 'imie': p['imie'], 'nazwisko': p['nazwisko'],
+                  'email': p['email'], 'nrtel': p['nrtel'], 'rola': p['rola']} for p in pracownicy]
+        return JsonResponse({'status': 'success', 'pracownicy': lista})
+
     # DODAWANIE NOWEGO PRACOWNIKA (POST)
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -703,6 +724,14 @@ def api_CRUD_grupa(request, grupa_id=None):
     if rola_sesja != 'planista':
         return JsonResponse(
             {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać grupami.'}, status=403)
+
+    # Pobieranie danych
+    if request.method == 'GET':
+        grupy = Grupy.objects.all().values('idg', 'rokstudiow', 'semestr', 'rokakadem', 'liczbaos', 'opis')
+        lista = [{'id': g['idg'], 'rokstudiow': g['rokstudiow'], 'semestr': g['semestr'], 'rokakadem': g['rokakadem'],
+                  'liczbaos': g['liczbaos'], 'opis': g['opis']} for g in grupy]
+        return JsonResponse({'status': 'success', 'grupy': lista})
+
 
     # DODAWANIE NOWEJ GRUPY (POST)
     if request.method == 'POST':
@@ -903,6 +932,19 @@ def api_CRUD_zajecia(request, zajecia_id=None):
 
     return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
 
+#odczyt budynków
+@csrf_exempt
+def api_get_budynki(request):
+    if request.method == 'GET':
+        budynki = Budynki.objects.all().values('idb', 'nazwab', 'adresb')
+        return JsonResponse({'status': 'success', 'budynki': list(budynki)})
+
+#odczyt kierunków
+@csrf_exempt
+def api_get_kierunki(request):
+    if request.method == 'GET':
+        kierunki = Kierunki.objects.all().values('idk', 'nazwak')
+        return JsonResponse({'status': 'success', 'kierunki': list(kierunki)})
 
 # Dodawanie i usuwanie kont
 @csrf_exempt

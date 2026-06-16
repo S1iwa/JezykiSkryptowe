@@ -10,7 +10,7 @@ function router() {
     } else if (sciezka === '/panel-wykladowcy/' || sciezka === '/panel-wykladowcy') {
         pokazPanelWykladowcy(app);
     } else if (sciezka === '/panel-planisty/' || sciezka === '/panel-planisty') {
-        app.innerHTML = '<h1>Panel planisty</h1>';
+        pokazPanelPlanisty(app);
     } else {
         app.innerHTML = '<h1>Strona główna</h1>';
     }
