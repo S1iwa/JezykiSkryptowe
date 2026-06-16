@@ -342,13 +342,6 @@ def api_professors_information(request):
         nazwisko_param = request.GET.get('nazwisko', '').strip()
         imie_param = request.GET.get('imie', '').strip()
 
-        # Wymagany co najmniej jeden parametr wyszukiwania
-        if not nazwisko_param and not imie_param:
-            return JsonResponse(
-                {'status': 'error', 'message': 'Podaj co najmniej imię lub nazwisko prowadzącego'},
-                status=400
-            )
-
         # Szukamy tylko wśród pracowników z rolą wykładowcy (iexact = ignoruj wielkość liter)
         pracownicy_qs = Pracownicy.objects.filter(rola__iexact='wykladowca')
 

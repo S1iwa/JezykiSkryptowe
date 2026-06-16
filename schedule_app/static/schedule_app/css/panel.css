@@ -83,6 +83,13 @@
     text-align: left;
     transition: background 0.15s, border-color 0.15s;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-btn .material-symbols-outlined {
+    font-size: 17px;
 }
 
 .sidebar-btn:hover {
