@@ -1,19 +1,42 @@
+// Inicjalizacja motywu z localStorage
+(function() {
+    if (localStorage.getItem('motyw') === 'dark') {
+        document.body.classList.add('dark');
+    }
+
+    const btn = document.createElement('button');
+    btn.id = 'przycisk-motywu';
+    btn.className = 'przycisk-motywu';
+    btn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    btn.onclick = toggleMotyw;
+    document.body.appendChild(btn);
+})();
+
+function toggleMotyw() {
+    const isDark = document.body.classList.toggle('dark');
+    localStorage.setItem('motyw', isDark ? 'dark' : 'light');
+    const btn = document.getElementById('przycisk-motywu');
+    if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+}
+
 // Funkcja pokazLogowanie - Strona logowania
 function pokazLogowanie(app) {
     app.innerHTML = `
-        <div class="formularz-logowania">
-            <h2>Logowanie</h2>
-            <p>Jeden formularz dla studenta, wykładowcy i planisty.</p>
-            <div id="blad-logowania" class="blad hidden"></div>
-            <div class="pole">
-                <label for="pole-email">E-mail</label>
-                <input type="email" id="pole-email" placeholder="np. j.kowalski@student.pl">
+        <div class="login-wrapper">
+            <div class="formularz-logowania">
+                <h2>Logowanie</h2>
+                <p class="login-podtytul">Jeden formularz dla studenta, wykładowcy i planisty.</p>
+                <div id="blad-logowania" class="blad hidden"></div>
+                <div class="pole">
+                    <label for="pole-email">E-mail</label>
+                    <input type="email" id="pole-email" placeholder="np. j.kowalski@student.pl">
+                </div>
+                <div class="pole">
+                    <label for="pole-haslo">Hasło</label>
+                    <input type="password" id="pole-haslo" placeholder="hasło">
+                </div>
+                <button id="przycisk-login">Zaloguj się</button>
             </div>
-            <div class="pole">
-                <label for="pole-haslo">Hasło</label>
-                <input type="password" id="pole-haslo" placeholder="hasło">
-            </div>
-            <button id="przycisk-login">Zaloguj się</button>
         </div>
     `;
 
@@ -59,9 +82,6 @@ function pokazLogowanie(app) {
     }
 }
 
-
-
-// Funkcja pokazPanelStudenta:
 function pokazPanelStudenta(app) {
     var email = sessionStorage.getItem('email');
     var planTekst = sessionStorage.getItem('plan');
