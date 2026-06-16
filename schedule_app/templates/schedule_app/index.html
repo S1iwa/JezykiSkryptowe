@@ -8,7 +8,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="../../static/schedule_app/css/styles.css">
+  <!-- CSS -->
+  <link rel="stylesheet" href="../../static/schedule_app/css/variables.css">
+  <link rel="stylesheet" href="../../static/schedule_app/css/base.css">
+  <link rel="stylesheet" href="../../static/schedule_app/css/components.css">
+  <link rel="stylesheet" href="../../static/schedule_app/css/panel.css">
+  <link rel="stylesheet" href="../../static/schedule_app/css/login.css">
 </head>
 <body>
   <div id="app"></div>
@@ -17,6 +22,12 @@
     window.CSRF_TOKEN = '{{ csrf_token }}';
   </script>
 
-  <script src="../../static/schedule_app/js/app.js" defer></script>
+  <!-- JS -->
+  <script src="../../static/schedule_app/js/theme.js" defer></script>
+  <script src="../../static/schedule_app/js/auth.js" defer></script>
+  <script src="../../static/schedule_app/js/panel_student.js" defer></script>
+  <script src="../../static/schedule_app/js/panel_wykladowcy.js" defer></script>
+  <script src="../../static/schedule_app/js/panel_planisty.js" defer></script>
+  <script src="../../static/schedule_app/js/router.js" defer></script>
 </body>
 </html>
