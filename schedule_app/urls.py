@@ -10,4 +10,7 @@ urlpatterns = [
     path('api/schedule/find-audience/', views.api_find_the_audience, name='api_find_the_audience'),
     path('api/students/professors-information/', views.api_professors_information, name='api_professors_information'),
     path('api/CRUD/subject/', views.api_CRUD_subject, name='api_CRUD_subject'),
+    path('api/CRUD/subject/<int:przedmiot_id>/', views.api_CRUD_subject, name='api_CRUD_subject_id'),
+    path('api/CRUD/sala/', views.api_CRUD_sala, name='api_CRUD_sala'),
+    path('api/CRUD/sala/<int:sala_id>/', views.api_CRUD_sala, name='api_CRUD_sala_id'),
 ]

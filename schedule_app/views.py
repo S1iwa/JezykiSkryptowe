@@ -285,72 +285,6 @@ def api_professors_information(request):
         nazwisko_param = request.GET.get('nazwisko', '').strip()
         imie_param = request.GET.get('imie', '').strip()
 
-    return JsonResponse({'status': 'success', 'message': 'Hasło zostało pomyślnie zmienione'})
-
-# Export CSV dla dowolnego modelu
-def api_export_csv(request, model_name):
-    if request.method != 'GET':
-        return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
-    
-    try:
-        model = apps.get_model('schedule_app', model_name)
-    except LookupError:
-        return JsonResponse({'status': 'error', 'message': f'Model {model_name} nie istnieje'}, status=404)
-        
-    data = list(model.objects.all().values())
-    if not data:
-        return JsonResponse({'status': 'error', 'message': 'Brak danych do eksportu'}, status=404)
-
-    df = pd.DataFrame(data)
-    
-    response = HttpResponse(content_type='text/csv; charset=utf-8')
-    response['Content-Disposition'] = f'attachment; filename="{model_name}.csv"'
-    
-    df.to_csv(path_or_buf=response, index=False, encoding='utf-8')
-    
-    return response
-
-# Import CSV dla dowolnego modelu
-@csrf_exempt
-def api_import_csv(request, model_name):
-    if request.method != 'POST':
-        return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
-        
-    try:
-        model = apps.get_model('schedule_app', model_name)
-    except LookupError:
-        return JsonResponse({'status': 'error', 'message': f'Model {model_name} nie istnieje'}, status=404)
-        
-    if 'file' not in request.FILES:
-        return JsonResponse({'status': 'error', 'message': 'Brak pliku w żądaniu'}, status=400)
-        
-    file = request.FILES['file']
-    if not file.name.endswith('.csv'):
-        return JsonResponse({'status': 'error', 'message': 'Plik musi być w formacie CSV'}, status=400)
-        
-    try:
-        df = pd.read_csv(file)
-        df = df.replace({np.nan: None})
-        
-        success_count = 0
-        skipped_records = []
-        
-        for index, row in df.iterrows():
-            row_dict = row.to_dict()
-            try:
-                model.objects.create(**row_dict)
-                success_count += 1
-            except Exception as e:
-                skipped_records.append({'row': index + 2, 'data': row_dict, 'reason': str(e)})
-                
-        return JsonResponse({
-            'status': 'success',
-            'message': f'Import zakończony. Zaimportowano: {success_count}. Pominięto: {len(skipped_records)}',
-            'skipped': skipped_records
-        })
-        
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': f'Błąd podczas przetwarzania pliku: {str(e)}'}, status=500)
         # Wymagany co najmniej jeden parametr wyszukiwania
         if not nazwisko_param and not imie_param:
             return JsonResponse(
@@ -405,7 +339,75 @@ def api_import_csv(request, model_name):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Błąd serwera: {str(e)}'}, status=500)
 
+
+# Export CSV dla dowolnego modelu
+def api_export_csv(request, model_name):
+    if request.method != 'GET':
+        return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+    try:
+        model = apps.get_model('schedule_app', model_name)
+    except LookupError:
+        return JsonResponse({'status': 'error', 'message': f'Model {model_name} nie istnieje'}, status=404)
+
+    data = list(model.objects.all().values())
+    if not data:
+        return JsonResponse({'status': 'error', 'message': 'Brak danych do eksportu'}, status=404)
+
+    df = pd.DataFrame(data)
+
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="{model_name}.csv"'
+
+    df.to_csv(path_or_buf=response, index=False, encoding='utf-8')
+
+    return response
+
+
+# Import CSV dla dowolnego modelu
+@csrf_exempt
+def api_import_csv(request, model_name):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+    try:
+        model = apps.get_model('schedule_app', model_name)
+    except LookupError:
+        return JsonResponse({'status': 'error', 'message': f'Model {model_name} nie istnieje'}, status=404)
+
+    if 'file' not in request.FILES:
+        return JsonResponse({'status': 'error', 'message': 'Brak pliku w żądaniu'}, status=400)
+
+    file = request.FILES['file']
+    if not file.name.endswith('.csv'):
+        return JsonResponse({'status': 'error', 'message': 'Plik musi być w formacie CSV'}, status=400)
+
+    try:
+        df = pd.read_csv(file)
+        df = df.replace({np.nan: None})
+
+        success_count = 0
+        skipped_records = []
+
+        for index, row in df.iterrows():
+            row_dict = row.to_dict()
+            try:
+                model.objects.create(**row_dict)
+                success_count += 1
+            except Exception as e:
+                skipped_records.append({'row': index + 2, 'data': row_dict, 'reason': str(e)})
+
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Import zakończony. Zaimportowano: {success_count}. Pominięto: {len(skipped_records)}',
+            'skipped': skipped_records
+        })
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Błąd podczas przetwarzania pliku: {str(e)}'}, status=500)
+
 # Planista
+# Przedmioty
 @csrf_exempt
 def api_CRUD_subject(request, przedmiot_id=None):
     # 1. ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
@@ -459,5 +461,74 @@ def api_CRUD_subject(request, przedmiot_id=None):
 
         przedmiot.delete()
         return JsonResponse({'status': 'success', 'message': 'Przedmiot usunięty'})
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+# Sala
+@csrf_exempt
+def api_CRUD_sala(request, sala_id=None):
+    # ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola = request.session.get('zalogowana_rola')
+    if rola != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać salami.'}, status=403)
+
+    # DODAWANIE NOWEJ SALI (POST)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        # pobieramy obiekt Budynki na podstawie przesłanego ID
+        budynek = Budynki.objects.filter(idb=data.get('idb')).first()
+        if not budynek:
+            return JsonResponse({'status': 'error', 'message': 'Podany budynek nie istnieje'}, status=404)
+
+        nowa_sala = Sale.objects.create(
+            numers=data.get('numers'),
+            typs=data.get('typs'),
+            pojemnosc=data.get('pojemnosc'),
+            idb=budynek
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Sala dodana pomyślnie',
+            'id': nowa_sala.ids
+        })
+
+    # EDYTOWANIE ISTNIEJĄCEJ SALI (PUT)
+    elif request.method == 'PUT':
+        if not sala_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID sali do edycji'}, status=400)
+
+        sala = Sale.objects.filter(ids=sala_id).first()
+        if not sala:
+            return JsonResponse({'status': 'error', 'message': 'Sala nie istnieje'}, status=404)
+
+        data = json.loads(request.body)
+
+        # Jeśli przesłano nowe idb, zamieniamy budynek
+        if 'idb' in data:
+            budynek = Budynki.objects.filter(idb=data['idb']).first()
+            if not budynek:
+                return JsonResponse({'status': 'error', 'message': 'Podany budynek nie istnieje'}, status=404)
+            sala.idb = budynek
+
+        sala.numers = data.get('numers', sala.numers)
+        sala.typs = data.get('typs', sala.typs)
+        sala.pojemnosc = data.get('pojemnosc', sala.pojemnosc)
+        sala.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Sala zaktualizowana'})
+
+    # USUWANIE SALI (DELETE)
+    elif request.method == 'DELETE':
+        if not sala_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID sali do usunięcia'}, status=400)
+
+        sala = Sale.objects.filter(ids=sala_id).first()
+        if not sala:
+            return JsonResponse({'status': 'error', 'message': 'Sala nie istnieje'}, status=404)
+
+        sala.delete()
+        return JsonResponse({'status': 'success', 'message': 'Sala usunięta'})
 
     return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
