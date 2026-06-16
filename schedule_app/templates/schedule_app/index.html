@@ -1,0 +1,19 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>University Schedule - Plan Zajęć</title>
+  <link rel="stylesheet" href="{% static 'schedule_app/css/styles.css' %}">
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    window.CSRF_TOKEN = '{{ csrf_token }}';
+  </script>
+
+  <script src="{% static 'schedule_app/js/app.js' %}" defer></script>
+</body>
+</html>
