@@ -422,6 +422,11 @@ def api_CRUD_subject(request, przedmiot_id=None):
     if request.method == 'POST':
         data = json.loads(request.body)
 
+        wymagane_pola = ['nazwap', 'formap', 'lbgodz']
+        brakujace = [pole for pole in wymagane_pola if not data.get(pole)]
+        if brakujace:
+            return JsonResponse({'status': 'error', 'message': f'Brakujące pola: {", ".join(brakujace)}'}, status=400)
+
         nowy_przedmiot = Przedmioty.objects.create(
             nazwap=data.get('nazwap'),
             formap=data.get('formap'),
@@ -479,10 +484,19 @@ def api_CRUD_sala(request, sala_id=None):
     if request.method == 'POST':
         data = json.loads(request.body)
 
+        wymagane_pola = ['numers', 'typs', 'pojemnosc', 'idb']
+        brakujace = [pole for pole in wymagane_pola if data.get(pole) is None or data.get(pole) == '']
+        if brakujace:
+            return JsonResponse({'status': 'error', 'message': f'Brakujące pola: {", ".join(brakujace)}'}, status=400)
+
         # pobieramy obiekt Budynki na podstawie przesłanego ID
         budynek = Budynki.objects.filter(idb=data.get('idb')).first()
         if not budynek:
             return JsonResponse({'status': 'error', 'message': 'Podany budynek nie istnieje'}, status=404)
+
+        numers = data.get('numers')
+        if Sale.objects.filter(numers=numers, idb=budynek).exists():
+            return JsonResponse({'status': 'error', 'message': 'Sala o tym numerze już istnieje w podanym budynku'}, status=409)
 
         nowa_sala = Sale.objects.create(
             numers=data.get('numers'),
@@ -508,13 +522,19 @@ def api_CRUD_sala(request, sala_id=None):
         data = json.loads(request.body)
 
         # Jeśli przesłano nowe idb, zamieniamy budynek
+        nowy_budynek = sala.idb
         if 'idb' in data:
-            budynek = Budynki.objects.filter(idb=data['idb']).first()
-            if not budynek:
+            nowy_budynek = Budynki.objects.filter(idb=data['idb']).first()
+            if not nowy_budynek:
                 return JsonResponse({'status': 'error', 'message': 'Podany budynek nie istnieje'}, status=404)
-            sala.idb = budynek
+            sala.idb = nowy_budynek
 
-        sala.numers = data.get('numers', sala.numers)
+        nowy_numers = data.get('numers', sala.numers)
+        # Sprawdzamy czy zmiana nie narusza unikalności numers+idb
+        if (nowy_numers != sala.numers or nowy_budynek.idb != sala.idb.idb) and Sale.objects.filter(numers=nowy_numers, idb=nowy_budynek).exists():
+            return JsonResponse({'status': 'error', 'message': 'Sala o tym numerze już istnieje w tym budynku'}, status=409)
+
+        sala.numers = nowy_numers
         sala.typs = data.get('typs', sala.typs)
         sala.pojemnosc = data.get('pojemnosc', sala.pojemnosc)
         sala.save()
@@ -548,9 +568,17 @@ def api_CRUD_pracownik(request, pracownik_id=None):
     # DODAWANIE NOWEGO PRACOWNIKA (POST)
     if request.method == 'POST':
         data = json.loads(request.body)
+        
+        wymagane_pola = ['nazwisko', 'imie', 'email', 'haslo', 'rola']
+        brakujace = [pole for pole in wymagane_pola if not data.get(pole)]
+        if brakujace:
+            return JsonResponse({'status': 'error', 'message': f'Brakujące pola: {", ".join(brakujace)}'}, status=400)
+
         haslo = data.get('haslo')
-        if not haslo:
-            return JsonResponse({'status': 'error', 'message': 'Hasło jest wymagane'}, status=400)
+        email = data.get('email')
+        
+        if email and (Studenci.objects.filter(email=email).exists() or Pracownicy.objects.filter(email=email).exists()):
+            return JsonResponse({'status': 'error', 'message': 'Konto z podanym adresem email już istnieje'}, status=409)
 
         nowy_pracownik = Pracownicy.objects.create(
             stopien=data.get('stopien'),
@@ -578,10 +606,14 @@ def api_CRUD_pracownik(request, pracownik_id=None):
 
         data = json.loads(request.body)
 
+        nowy_email = data.get('email', pracownik.email)
+        if nowy_email != pracownik.email and (Studenci.objects.filter(email=nowy_email).exists() or Pracownicy.objects.filter(email=nowy_email).exists()):
+            return JsonResponse({'status': 'error', 'message': 'Konto z podanym adresem email już istnieje'}, status=409)
+
         pracownik.stopien = data.get('stopien', pracownik.stopien)
         pracownik.nazwisko = data.get('nazwisko', pracownik.nazwisko)
         pracownik.imie = data.get('imie', pracownik.imie)
-        pracownik.email = data.get('email', pracownik.email)
+        pracownik.email = nowy_email
         pracownik.nrtel = data.get('nrtel', pracownik.nrtel)
         pracownik.rola = data.get('rola', pracownik.rola)
         
@@ -620,6 +652,11 @@ def api_CRUD_grupa(request, grupa_id=None):
     # DODAWANIE NOWEJ GRUPY (POST)
     if request.method == 'POST':
         data = json.loads(request.body)
+
+        wymagane_pola = ['idk', 'rokstudiow', 'semestr', 'rokakadem', 'liczbaos']
+        brakujace = [pole for pole in wymagane_pola if data.get(pole) is None or data.get(pole) == '']
+        if brakujace:
+            return JsonResponse({'status': 'error', 'message': f'Brakujące pola: {", ".join(brakujace)}'}, status=400)
 
         # idk to Foreign Key – pobieramy obiekt Kierunki
         kierunek = Kierunki.objects.filter(idk=data.get('idk')).first()
@@ -708,6 +745,11 @@ def api_CRUD_zajecia(request, zajecia_id=None):
     # DODAWANIE NOWYCH ZAJĘĆ (POST)
     elif request.method == 'POST':
         data = json.loads(request.body)
+
+        wymagane_pola = ['dzien', 'godzrozp', 'godzzak', 'ids', 'idp', 'idpr', 'idg']
+        brakujace = [pole for pole in wymagane_pola if data.get(pole) is None or data.get(pole) == '']
+        if brakujace:
+            return JsonResponse({'status': 'error', 'message': f'Brakujące pola: {", ".join(brakujace)}'}, status=400)
 
         # Pobieranie kluczy obcych i walidacja
         sala = Sale.objects.filter(ids=data.get('ids')).first()
@@ -806,6 +848,84 @@ def api_CRUD_zajecia(request, zajecia_id=None):
 
     return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
 
+
+# Dodawanie i usuwanie kont
+@csrf_exempt
+def api_add_delete_account(request, typ_konta=None, konto_id=None):
+    # ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola_sesja = request.session.get('zalogowana_rola')
+    if rola_sesja != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać kontami.'}, status=403)
+
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        typ_konta_post = data.get('typ_konta')
+        email = data.get('email')
+        haslo = data.get('haslo')
+
+        if not typ_konta_post or typ_konta_post not in ['student', 'pracownik']:
+            return JsonResponse({'status': 'error', 'message': 'Podaj poprawny typ konta (student/pracownik)'}, status=400)
+        
+        if not email or not haslo:
+            return JsonResponse({'status': 'error', 'message': 'Email i hasło są wymagane'}, status=400)
+
+        # Reguła bazy danych: sprawdzamy czy email jest unikalny w OBU tabelach (ponieważ logowanie opiera się na emailu)
+        if Studenci.objects.filter(email=email).exists() or Pracownicy.objects.filter(email=email).exists():
+            return JsonResponse({'status': 'error', 'message': 'Konto z podanym adresem email już istnieje'}, status=409)
+
+        if typ_konta_post == 'student':
+            wymagane = ['nazwisko', 'imie', 'status']
+            brakujące = [pole for pole in wymagane if not data.get(pole)]
+            if brakujące:
+                return JsonResponse({'status': 'error', 'message': f'Brakujące pola dla studenta: {", ".join(brakujące)}'}, status=400)
+
+            nowy = Studenci.objects.create(
+                nazwisko=data.get('nazwisko'),
+                imie=data.get('imie'),
+                status=data.get('status'),
+                email=email,
+                haslo=make_password(haslo)
+            )
+            return JsonResponse({'status': 'success', 'message': 'Konto studenta utworzone', 'id': nowy.idst})
+        
+        elif typ_konta_post == 'pracownik':
+            wymagane = ['nazwisko', 'imie', 'rola']
+            brakujące = [pole for pole in wymagane if not data.get(pole)]
+            if brakujące:
+                return JsonResponse({'status': 'error', 'message': f'Brakujące pola dla pracownika: {", ".join(brakujące)}'}, status=400)
+
+            nowy = Pracownicy.objects.create(
+                stopien=data.get('stopien', ''),
+                nazwisko=data.get('nazwisko'),
+                imie=data.get('imie'),
+                email=email,
+                nrtel=data.get('nrtel', ''),
+                haslo=make_password(haslo),
+                rola=data.get('rola')
+            )
+            return JsonResponse({'status': 'success', 'message': 'Konto pracownika utworzone', 'id': nowy.idpr})
+
+    elif request.method == 'DELETE':
+        if not typ_konta or not konto_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać typ konta i ID w URL do usunięcia'}, status=400)
+
+        if typ_konta == 'student':
+            konto = Studenci.objects.filter(idst=konto_id).first()
+            if not konto: return JsonResponse({'status': 'error', 'message': 'Student nie istnieje'}, status=404)
+            konto.delete()
+            return JsonResponse({'status': 'success', 'message': 'Konto studenta usunięte'})
+            
+        elif typ_konta == 'pracownik':
+            konto = Pracownicy.objects.filter(idpr=konto_id).first()
+            if not konto: return JsonResponse({'status': 'error', 'message': 'Pracownik nie istnieje'}, status=404)
+            konto.delete()
+            return JsonResponse({'status': 'success', 'message': 'Konto pracownika usunięte'})
+            
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Nieznany typ konta'}, status=400)
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
 
 
 
