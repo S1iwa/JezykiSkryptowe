@@ -605,3 +605,78 @@ def api_CRUD_pracownik(request, pracownik_id=None):
 
     return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
 
+
+# Grupa
+@csrf_exempt
+def api_CRUD_grupa(request, grupa_id=None):
+    # ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola_sesja = request.session.get('zalogowana_rola')
+    if rola_sesja != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać grupami.'}, status=403)
+
+    # DODAWANIE NOWEJ GRUPY (POST)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        # idk to Foreign Key – pobieramy obiekt Kierunki
+        kierunek = Kierunki.objects.filter(idk=data.get('idk')).first()
+        if not kierunek:
+            return JsonResponse({'status': 'error', 'message': 'Podany kierunek nie istnieje'}, status=404)
+
+        nowa_grupa = Grupy.objects.create(
+            idk=kierunek,
+            rokstudiow=data.get('rokstudiow'),
+            semestr=data.get('semestr'),
+            rokakadem=data.get('rokakadem'),
+            liczbaos=data.get('liczbaos'),
+            opis=data.get('opis', '')
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Grupa dodana pomyślnie',
+            'id': nowa_grupa.idg
+        })
+
+    # EDYTOWANIE ISTNIEJĄCEJ GRUPY (PUT)
+    elif request.method == 'PUT':
+        if not grupa_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID grupy do edycji'}, status=400)
+
+        grupa = Grupy.objects.filter(idg=grupa_id).first()
+        if not grupa:
+            return JsonResponse({'status': 'error', 'message': 'Grupa nie istnieje'}, status=404)
+
+        data = json.loads(request.body)
+
+        # Jeśli przesłano nowe idk, zamieniamy FK
+        if 'idk' in data:
+            kierunek = Kierunki.objects.filter(idk=data['idk']).first()
+            if not kierunek:
+                return JsonResponse({'status': 'error', 'message': 'Podany kierunek nie istnieje'}, status=404)
+            grupa.idk = kierunek
+
+        grupa.rokstudiow = data.get('rokstudiow', grupa.rokstudiow)
+        grupa.semestr = data.get('semestr', grupa.semestr)
+        grupa.rokakadem = data.get('rokakadem', grupa.rokakadem)
+        grupa.liczbaos = data.get('liczbaos', grupa.liczbaos)
+        grupa.opis = data.get('opis', grupa.opis)
+
+        grupa.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Dane grupy zaktualizowane'})
+
+    # USUWANIE GRUPY (DELETE)
+    elif request.method == 'DELETE':
+        if not grupa_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID grupy do usunięcia'}, status=400)
+
+        grupa = Grupy.objects.filter(idg=grupa_id).first()
+        if not grupa:
+            return JsonResponse({'status': 'error', 'message': 'Grupa nie istnieje'}, status=404)
+
+        grupa.delete()
+        return JsonResponse({'status': 'success', 'message': 'Grupa usunięta'})
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
