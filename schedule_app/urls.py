@@ -2,6 +2,14 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Strona główna SPA:
+    path('', views.index, name='index'),
+    path('logowanie/', views.index, name='logowanie'),
+    path('panel-studenta/', views.index, name='panel_studenta'),
+    path('panel-wykladowcy/', views.index, name='panel_wykladowcy'),
+    path('panel-planisty/', views.index, name='panel_planisty'),
+
+    # API:
     path('api/auth/login/', views.api_login, name='api_login'),
     path('api/auth/logout/', views.api_logout, name='api_logout'),
     path('api/auth/change_password/', views.api_change_password, name='api_change_password'),
