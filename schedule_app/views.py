@@ -917,6 +917,19 @@ def api_CRUD_zajecia(request, zajecia_id=None):
 
     return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
 
+#odczyt budynków
+@csrf_exempt
+def api_get_budynki(request):
+    if request.method == 'GET':
+        budynki = Budynki.objects.all().values('idb', 'nazwab', 'adresb')
+        return JsonResponse({'status': 'success', 'budynki': list(budynki)})
+
+#odczyt kierunków
+@csrf_exempt
+def api_get_kierunki(request):
+    if request.method == 'GET':
+        kierunki = Kierunki.objects.all().values('idk', 'nazwak')
+        return JsonResponse({'status': 'success', 'kierunki': list(kierunki)})
 
 # Dodawanie i usuwanie kont
 @csrf_exempt
