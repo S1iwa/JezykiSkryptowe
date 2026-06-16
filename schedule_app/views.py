@@ -680,3 +680,128 @@ def api_CRUD_grupa(request, grupa_id=None):
 
     return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
 
+
+# Zajęcia
+@csrf_exempt
+def api_CRUD_zajecia(request, zajecia_id=None):
+    # ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola_sesja = request.session.get('zalogowana_rola')
+    if rola_sesja != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać zajęciami.'}, status=403)
+
+    # POBIERANIE ZAJĘĆ (GET)
+    if request.method == 'GET':
+        if zajecia_id:
+            zajecia = Zajecia.objects.select_related('ids', 'ids__idb', 'idp', 'idpr', 'idg', 'idg__idk').filter(idz=zajecia_id).first()
+            if not zajecia:
+                return JsonResponse({'status': 'error', 'message': 'Zajęcia nie istnieją'}, status=404)
+            return JsonResponse({'status': 'success', 'zajecia': _serializuj_zajecia(zajecia)})
+        else:
+            # Pobieramy wszystkie zajęcia, opcjonalnie można by dodać paginację lub filtry
+            zajecia_qs = Zajecia.objects.select_related('ids', 'ids__idb', 'idp', 'idpr', 'idg', 'idg__idk').all()
+            wynik = [_serializuj_zajecia(z) for z in zajecia_qs]
+            return JsonResponse({'status': 'success', 'zajecia': wynik})
+
+    # DODAWANIE NOWYCH ZAJĘĆ (POST)
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+
+        # Pobieranie kluczy obcych i walidacja
+        sala = Sale.objects.filter(ids=data.get('ids')).first()
+        przedmiot = Przedmioty.objects.filter(idp=data.get('idp')).first()
+        pracownik = Pracownicy.objects.filter(idpr=data.get('idpr')).first()
+        grupa = Grupy.objects.filter(idg=data.get('idg')).first()
+
+        bledy = []
+        if not sala: bledy.append('Podana sala nie istnieje')
+        if not przedmiot: bledy.append('Podany przedmiot nie istnieje')
+        if not pracownik: bledy.append('Podany wykładowca nie istnieje')
+        if not grupa: bledy.append('Podana grupa nie istnieje')
+
+        if bledy:
+            return JsonResponse({'status': 'error', 'message': 'Błąd walidacji kluczy obcych', 'errors': bledy}, status=404)
+
+        nowe_zajecia = Zajecia.objects.create(
+            dzien=data.get('dzien'),
+            godzrozp=data.get('godzrozp'),
+            godzzak=data.get('godzzak'),
+            uwagi=data.get('uwagi', ''),
+            ids=sala,
+            idp=przedmiot,
+            idpr=pracownik,
+            idg=grupa
+        )
+        
+        # Aby zwrócić szczegóły nowo dodanych zajęć, ładujemy je z relacjami
+        zajecia_z_bazy = Zajecia.objects.select_related('ids', 'ids__idb', 'idp', 'idpr', 'idg', 'idg__idk').get(idz=nowe_zajecia.idz)
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Zajęcia dodane pomyślnie',
+            'zajecia': _serializuj_zajecia(zajecia_z_bazy)
+        })
+
+    # EDYTOWANIE ISTNIEJĄCYCH ZAJĘĆ (PUT)
+    elif request.method == 'PUT':
+        if not zajecia_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID zajęć do edycji'}, status=400)
+
+        zajecia = Zajecia.objects.filter(idz=zajecia_id).first()
+        if not zajecia:
+            return JsonResponse({'status': 'error', 'message': 'Zajęcia nie istnieją'}, status=404)
+
+        data = json.loads(request.body)
+
+        # Walidacja ewentualnych zmian kluczy obcych
+        if 'ids' in data:
+            sala = Sale.objects.filter(ids=data['ids']).first()
+            if not sala: return JsonResponse({'status': 'error', 'message': 'Podana sala nie istnieje'}, status=404)
+            zajecia.ids = sala
+            
+        if 'idp' in data:
+            przedmiot = Przedmioty.objects.filter(idp=data['idp']).first()
+            if not przedmiot: return JsonResponse({'status': 'error', 'message': 'Podany przedmiot nie istnieje'}, status=404)
+            zajecia.idp = przedmiot
+            
+        if 'idpr' in data:
+            pracownik = Pracownicy.objects.filter(idpr=data['idpr']).first()
+            if not pracownik: return JsonResponse({'status': 'error', 'message': 'Podany pracownik nie istnieje'}, status=404)
+            zajecia.idpr = pracownik
+            
+        if 'idg' in data:
+            grupa = Grupy.objects.filter(idg=data['idg']).first()
+            if not grupa: return JsonResponse({'status': 'error', 'message': 'Podana grupa nie istnieje'}, status=404)
+            zajecia.idg = grupa
+
+        zajecia.dzien = data.get('dzien', zajecia.dzien)
+        zajecia.godzrozp = data.get('godzrozp', zajecia.godzrozp)
+        zajecia.godzzak = data.get('godzzak', zajecia.godzzak)
+        zajecia.uwagi = data.get('uwagi', zajecia.uwagi)
+
+        zajecia.save()
+        
+        # Zwracanie zaktualizowanych zajęć
+        zaktualizowane_zajecia = Zajecia.objects.select_related('ids', 'ids__idb', 'idp', 'idpr', 'idg', 'idg__idk').get(idz=zajecia.idz)
+
+        return JsonResponse({
+            'status': 'success', 
+            'message': 'Dane zajęć zaktualizowane',
+            'zajecia': _serializuj_zajecia(zaktualizowane_zajecia)
+        })
+
+    # USUWANIE ZAJĘĆ (DELETE)
+    elif request.method == 'DELETE':
+        if not zajecia_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID zajęć do usunięcia'}, status=400)
+
+        zajecia = Zajecia.objects.filter(idz=zajecia_id).first()
+        if not zajecia:
+            return JsonResponse({'status': 'error', 'message': 'Zajęcia nie istnieją'}, status=404)
+
+        zajecia.delete()
+        return JsonResponse({'status': 'success', 'message': 'Zajęcia usunięte'})
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+
