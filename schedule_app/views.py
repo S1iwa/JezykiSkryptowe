@@ -156,7 +156,12 @@ def api_login(request):
                 'status': 'success',
                 'role': 'student',
                 'redirect_to': '/panel-studenta',
-                'user_info': {'email': student.email},
+                'user_info': {
+                    'email': student.email,
+                    'imie': student.imie,
+                    'nazwisko': student.nazwisko,
+                    'status_studenta': student.status
+                },
                 'plan_zajec': _plan_studenta(student),
             })
 
@@ -174,7 +179,13 @@ def api_login(request):
                     'status': 'success',
                     'role': 'wykladowca',
                     'redirect_to': '/panel-wykladowcy',
-                    'user_info': {'email': pracownik.email},
+                    'user_info': {
+                        'email': pracownik.email,
+                        'imie': pracownik.imie,
+                        'nazwisko': pracownik.nazwisko,
+                        'stopien': pracownik.stopien,
+                        'telefon': pracownik.nrtel
+                    },
                     'plan_zajec': _plan_wykladowcy(pracownik),
                 })
             elif rola_pracownika == 'planista':
@@ -182,7 +193,11 @@ def api_login(request):
                     'status': 'success',
                     'role': 'planista',
                     'redirect_to': '/panel-planisty',
-                    'user_info': {'email': pracownik.email},
+                    'user_info': {
+                        'email': pracownik.email,
+                        'imie': pracownik.imie,
+                        'nazwisko': pracownik.nazwisko
+                    },
                 })
             else:
                 # Użytkownik jest w tabeli pracownicy, ale ma nieznaną rolę

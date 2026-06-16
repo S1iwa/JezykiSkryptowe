@@ -52,6 +52,12 @@ function pokazLogowanie(app) {
         .then(function(dane) {
             if (dane.status === 'success') {
                 sessionStorage.setItem('email', dane.user_info.email);
+                sessionStorage.setItem('imie', dane.user_info.imie || '');
+                sessionStorage.setItem('nazwisko', dane.user_info.nazwisko || '');
+                sessionStorage.setItem('stopien', dane.user_info.stopien || '');
+                sessionStorage.setItem('telefon', dane.user_info.telefon || '');
+                sessionStorage.setItem('status_studenta', dane.user_info.status_studenta || '');
+                
                 sessionStorage.setItem('rola', dane.role);
                 sessionStorage.setItem('plan', JSON.stringify(dane.plan_zajec || []));
 

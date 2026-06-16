@@ -1,7 +1,15 @@
 function pokazPanelStudenta(app) {
     var email = sessionStorage.getItem('email');
+    var imie = sessionStorage.getItem('imie');
+    var nazwisko = sessionStorage.getItem('nazwisko');
+    var status = sessionStorage.getItem('status_studenta');
     var planTekst = sessionStorage.getItem('plan');
     var planZajec = planTekst ? JSON.parse(planTekst) : [];
+
+    var pelneImie = `${imie} ${nazwisko}`;
+    if (!imie && !nazwisko) pelneImie = email; // Fallback w razie pustego cache
+
+    var liczbaZajec = planZajec.length;
 
     // Szablon wierszy tabeli.
     var wierszeTabeli = planZajec.map(function(zajecie) {
@@ -17,7 +25,7 @@ function pokazPanelStudenta(app) {
     }).join('');
 
     // Zabezpieczenie przed brakiem zajęć:
-    if (planZajec.length === 0) {
+    if (liczbaZajec === 0) {
         wierszeTabeli = '<tr><td colspan="5" style="text-align: center;">Brak zaplanowanych zajęć</td></tr>';
     }
 
@@ -29,7 +37,24 @@ function pokazPanelStudenta(app) {
                 <div class="sidebar-info">
                     <div class="sidebar-info-wiersz">
                         <span class="sidebar-info-label">Zalogowano jako</span>
+                        <span class="sidebar-info-wartosc" style="font-weight: 600;">${pelneImie}</span>
+                    </div>
+                    <div class="sidebar-info-wiersz">
+                        <span class="sidebar-info-label">E-mail</span>
                         <span class="sidebar-info-wartosc">${email}</span>
+                    </div>
+                    ${status ? `
+                    <div class="sidebar-info-wiersz">
+                        <span class="sidebar-info-label">Status</span>
+                        <span class="sidebar-info-wartosc">${status}</span>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="sidebar-divider" style="margin: 12px 0;"></div>
+                    
+                    <div class="sidebar-info-wiersz">
+                        <span class="sidebar-info-label">Zaplanowane zajęcia</span>
+                        <span class="sidebar-info-wartosc">${liczbaZajec}</span>
                     </div>
                 </div>
                 <hr class="sidebar-divider">

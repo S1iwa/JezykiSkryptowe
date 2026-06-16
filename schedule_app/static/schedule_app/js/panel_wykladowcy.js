@@ -1,8 +1,17 @@
 // Funkcja pokazPanelWykladowcy:
 function pokazPanelWykladowcy(app) {
     var email = sessionStorage.getItem('email');
+    var imie = sessionStorage.getItem('imie');
+    var nazwisko = sessionStorage.getItem('nazwisko');
+    var stopien = sessionStorage.getItem('stopien');
+    var telefon = sessionStorage.getItem('telefon');
     var planTekst = sessionStorage.getItem('plan');
     var planZajec = planTekst ? JSON.parse(planTekst) : [];
+    
+    var pelneImie = stopien ? `${stopien} ${imie} ${nazwisko}` : `${imie} ${nazwisko}`;
+    if (!imie && !nazwisko) pelneImie = email; // Fallback w razie pustego cache
+    
+    var liczbaZajec = planZajec.length;
 
     var wierszeTabeli = planZajec.map(function(zajecie) {
         return `
@@ -15,7 +24,7 @@ function pokazPanelWykladowcy(app) {
             </tr>
         `;
     }).join('');
-    if (planZajec.length === 0) {
+    if (liczbaZajec === 0) {
         wierszeTabeli = '<tr><td colspan="5" style="text-align: center;">Brak zaplanowanych zajęć</td></tr>';
     }
 
@@ -26,7 +35,24 @@ function pokazPanelWykladowcy(app) {
                 <div class="sidebar-info">
                     <div class="sidebar-info-wiersz">
                         <span class="sidebar-info-label">Zalogowano jako</span>
+                        <span class="sidebar-info-wartosc" style="font-weight: 600;">${pelneImie}</span>
+                    </div>
+                    <div class="sidebar-info-wiersz">
+                        <span class="sidebar-info-label">E-mail</span>
                         <span class="sidebar-info-wartosc">${email}</span>
+                    </div>
+                    ${telefon ? `
+                    <div class="sidebar-info-wiersz">
+                        <span class="sidebar-info-label">Telefon</span>
+                        <span class="sidebar-info-wartosc">${telefon}</span>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="sidebar-divider" style="margin: 12px 0;"></div>
+                    
+                    <div class="sidebar-info-wiersz">
+                        <span class="sidebar-info-label">Zaplanowane zajęcia</span>
+                        <span class="sidebar-info-wartosc">${liczbaZajec}</span>
                     </div>
                 </div>
                 <hr class="sidebar-divider">
