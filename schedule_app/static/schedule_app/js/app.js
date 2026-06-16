@@ -123,7 +123,7 @@ function pokazPanelStudenta(app) {
                 <ul id="wyniki-wyszukiwania" style="margin-top: 10px;"></ul>
             </div>
 
-            <h3>Twój plan zajęć</h3>
+            <h3>Twój plan zajęć:</h3>
             <table class="tabela-planu">
                 <thead>
                     <tr>
@@ -250,6 +250,141 @@ function pokazPanelStudenta(app) {
 
 
 
+// Funkcja pokazPanelWykladowcy:
+function pokazPanelWykladowcy(app) {
+    var email = sessionStorage.getItem('email');
+    var planTekst = sessionStorage.getItem('plan');
+    var planZajec = planTekst ? JSON.parse(planTekst) : [];
+
+    var wierszeTabeli = planZajec.map(function(zajecie) {
+        return `
+            <tr>
+                <td>${zajecie.dzien}</td>
+                <td>${zajecie.godzrozp} - ${zajecie.godzzak}</td>
+                <td>${zajecie.przedmiot.nazwap} (${zajecie.przedmiot.formap})</td>
+                <td>${zajecie.sala.budynek.nazwab}, sala ${zajecie.sala.numers}</td>
+                <td>${zajecie.kierunek.nazwak} (sem. ${zajecie.kierunek.semestr})</td>
+            </tr>
+        `;
+    }).join('');
+    if (planZajec.length === 0) {
+        wierszeTabeli = '<tr><td colspan="5" style="text-align: center;">Brak zaplanowanych zajęć</td></tr>';
+    }
+
+    app.innerHTML = `
+        <div class="panel-kontener">
+            <div class="panel-naglowek">
+                <h2>Panel Wykładowcy</h2>
+                <p>Zalogowano jako: <strong>${email}</strong></p>
+                <button id="przycisk-wyloguj-wykladowca" class="przycisk-maly">Wyloguj się</button>
+            </div>
+            <div class="akcje-panelu">
+                <button id="przycisk-pokaz-haslo-wykladowca" class="przycisk-akcja">Zmień hasło</button>
+                <button id="przycisk-eksport-csv-wykladowca" class="przycisk-akcja">Pobierz plan (CSV)</button>
+            </div>
+            <div id="sekcja-haslo-wykladowca" class="ukryta-sekcja hidden">
+                <h3>Zmiana hasła</h3>
+                <div id="komunikat-haslo-wykladowca" class="blad hidden"></div>
+                <div class="pole">
+                    <input type="password" id="stare-haslo-wykladowca" placeholder="Stare hasło">
+                </div>
+                <div class="pole">
+                    <input type="password" id="nowe-haslo-wykladowca" placeholder="Nowe hasło">
+                </div>
+                <button id="przycisk-zmien-haslo-wykladowca" class="przycisk-akcja">Potwierdź zmianę</button>
+            </div>
+            <h3>Twój plan zajęć:</h3>
+            <table class="tabela-planu">
+                <thead>
+                    <tr>
+                        <th>Dzień</th>
+                        <th>Godziny</th>
+                        <th>Przedmiot</th>
+                        <th>Sala</th>
+                        <th>Kierunek (semestr)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${wierszeTabeli}
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    // Wylogowywanie:
+    document.getElementById('przycisk-wyloguj-wykladowca').onclick = function() {
+        fetch('/api/auth/logout/', { method: 'POST', headers: { 'X-CSRFToken': window.CSRF_TOKEN } })
+        .then(function() {
+            sessionStorage.clear();
+            history.pushState({}, '', '/logowanie/');
+            router();
+        });
+    };
+
+    // Przełączanie zmiany hasła:
+    document.getElementById('przycisk-pokaz-haslo-wykladowca').onclick = function() {
+        document.getElementById('sekcja-haslo-wykladowca').classList.toggle('hidden');
+    };
+
+    // Logika eksportu CSV:
+    document.getElementById('przycisk-eksport-csv-wykladowca').onclick = function() {
+        if (planZajec.length === 0) {
+            alert('Brak zajęć do eksportu.');
+            return;
+        }
+
+        var naglowki = ['Dzien', 'Od', 'Do', 'Przedmiot', 'Forma', 'Sala', 'Budynek', 'Kierunek'];
+
+        var wierszeCsv = planZajec.map(function(z) {
+            return [
+                z.dzien, z.godzrozp, z.godzzak,
+                z.przedmiot.nazwap, z.przedmiot.formap,
+                z.sala.numers, z.sala.budynek.nazwab,
+                z.kierunek.nazwak + " (sem. " + z.kierunek.semestr + ")"
+            ].join(';');
+        });
+
+        var csvTekst = '\uFEFF' + naglowki.join(';') + '\n' + wierszeCsv.join('\n');
+        var blob = new Blob([csvTekst], { type: 'text/csv;charset=utf-8;' });
+        var link = document.createElement('a');
+
+        link.href = URL.createObjectURL(blob);
+        link.download = 'plan_wykladowcy.csv';
+        link.click();
+    };
+
+    // Logika zmiany hasła:
+    document.getElementById('przycisk-zmien-haslo-wykladowca').onclick = function() {
+        var stareHaslo = document.getElementById('stare-haslo-wykladowca').value;
+        var noweHaslo = document.getElementById('nowe-haslo-wykladowca').value;
+        var komunikat = document.getElementById('komunikat-haslo-wykladowca');
+
+        fetch('/api/auth/change_password/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': window.CSRF_TOKEN
+            },
+            body: JSON.stringify({ old_password: stareHaslo, new_password: noweHaslo })
+        })
+        .then(res => res.json())
+        .then(dane => {
+            komunikat.classList.remove('hidden');
+            if (dane.status === 'success') {
+                komunikat.style.color = 'green';
+                komunikat.textContent = 'Hasło zostało zmienione!';
+
+            } else {
+                komunikat.style.color = 'red';
+                komunikat.textContent = dane.message;
+
+            }
+        });
+    };
+}
+
+
+
 // Funkcja router - Przeglądarka sprawdza aktualny adres URL i wyświetla odpowiednią treść:
 function router() {
     var sciezka = window.location.pathname;
@@ -260,7 +395,7 @@ function router() {
     } else if (sciezka === '/panel-studenta/' || sciezka === '/panel-studenta') {
         pokazPanelStudenta(app);
     } else if (sciezka === '/panel-wykladowcy/' || sciezka === '/panel-wykladowcy') {
-        app.innerHTML = '<h1>Panel wykładowcy</h1>';
+        pokazPanelWykladowcy(app);
     } else if (sciezka === '/panel-planisty/' || sciezka === '/panel-planisty') {
         app.innerHTML = '<h1>Panel planisty</h1>';
     } else {
