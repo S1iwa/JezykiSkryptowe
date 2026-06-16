@@ -19,4 +19,6 @@ urlpatterns = [
     path('api/CRUD/grupa/<int:grupa_id>/', views.api_CRUD_grupa, name='api_CRUD_grupa_id'),
     path('api/CRUD/zajecia/', views.api_CRUD_zajecia, name='api_CRUD_zajecia'),
     path('api/CRUD/zajecia/<int:zajecia_id>/', views.api_CRUD_zajecia, name='api_CRUD_zajecia_id'),
+    path('api/accounts/manage/', views.api_add_delete_account, name='api_add_delete_account_post'),
+    path('api/accounts/manage/<str:typ_konta>/<int:konto_id>/', views.api_add_delete_account, name='api_add_delete_account_delete'),
 ]

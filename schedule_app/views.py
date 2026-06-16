@@ -805,3 +805,73 @@ def api_CRUD_zajecia(request, zajecia_id=None):
         return JsonResponse({'status': 'success', 'message': 'Zajęcia usunięte'})
 
     return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+
+# Dodawanie i usuwanie kont
+@csrf_exempt
+def api_add_delete_account(request, typ_konta=None, konto_id=None):
+    # ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola_sesja = request.session.get('zalogowana_rola')
+    if rola_sesja != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać kontami.'}, status=403)
+
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        typ_konta_post = data.get('typ_konta')
+        email = data.get('email')
+        haslo = data.get('haslo')
+
+        if not typ_konta_post or typ_konta_post not in ['student', 'pracownik']:
+            return JsonResponse({'status': 'error', 'message': 'Podaj poprawny typ konta (student/pracownik)'}, status=400)
+        
+        if not email or not haslo:
+            return JsonResponse({'status': 'error', 'message': 'Email i hasło są wymagane'}, status=400)
+
+        # Reguła bazy danych: sprawdzamy czy email jest unikalny w OBU tabelach (ponieważ logowanie opiera się na emailu)
+        if Studenci.objects.filter(email=email).exists() or Pracownicy.objects.filter(email=email).exists():
+            return JsonResponse({'status': 'error', 'message': 'Konto z podanym adresem email już istnieje'}, status=409)
+
+        if typ_konta_post == 'student':
+            nowy = Studenci.objects.create(
+                nazwisko=data.get('nazwisko', ''),
+                imie=data.get('imie', ''),
+                status=data.get('status', 'aktywny'),
+                email=email,
+                haslo=make_password(haslo)
+            )
+            return JsonResponse({'status': 'success', 'message': 'Konto studenta utworzone', 'id': nowy.idst})
+        
+        elif typ_konta_post == 'pracownik':
+            nowy = Pracownicy.objects.create(
+                stopien=data.get('stopien', ''),
+                nazwisko=data.get('nazwisko', ''),
+                imie=data.get('imie', ''),
+                email=email,
+                nrtel=data.get('nrtel', ''),
+                haslo=make_password(haslo),
+                rola=data.get('rola', 'wykladowca')
+            )
+            return JsonResponse({'status': 'success', 'message': 'Konto pracownika utworzone', 'id': nowy.idpr})
+
+    elif request.method == 'DELETE':
+        if not typ_konta or not konto_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać typ konta i ID w URL do usunięcia'}, status=400)
+
+        if typ_konta == 'student':
+            konto = Studenci.objects.filter(idst=konto_id).first()
+            if not konto: return JsonResponse({'status': 'error', 'message': 'Student nie istnieje'}, status=404)
+            konto.delete()
+            return JsonResponse({'status': 'success', 'message': 'Konto studenta usunięte'})
+            
+        elif typ_konta == 'pracownik':
+            konto = Pracownicy.objects.filter(idpr=konto_id).first()
+            if not konto: return JsonResponse({'status': 'error', 'message': 'Pracownik nie istnieje'}, status=404)
+            konto.delete()
+            return JsonResponse({'status': 'success', 'message': 'Konto pracownika usunięte'})
+            
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Nieznany typ konta'}, status=400)
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
