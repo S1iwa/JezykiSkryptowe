@@ -33,15 +33,7 @@ function pokazPanelWykladowcy(app) {
             <aside class="panel-sidebar">
                 <p class="sidebar-tytul">Panel Wykładowcy</p>
                 
-                <div class="sidebar-akcje" style="margin-top: 20px; margin-bottom: 2px;">
-                    <button id="nav-plan" class="sidebar-btn active"><span class="material-symbols-outlined">calendar_month</span> Mój plan zajęć</button>
-                    <button id="nav-sale" class="sidebar-btn"><span class="material-symbols-outlined">meeting_room</span> Wyszukaj wolną salę</button>
-                    <button id="nav-prowadzacy" class="sidebar-btn"><span class="material-symbols-outlined">groups</span> Lista prowadzących</button>
-                </div>
-
-                <hr class="sidebar-divider">
-
-                <div class="sidebar-info" style="margin-top: 0;">
+                <div class="sidebar-info">
                     <div class="sidebar-info-wiersz">
                         <span class="sidebar-info-label">Zalogowano jako</span>
                         <span class="sidebar-info-wartosc" style="font-weight: 600;">${pelneImie}</span>
@@ -68,6 +60,12 @@ function pokazPanelWykladowcy(app) {
                 <hr class="sidebar-divider">
                 
                 <div class="sidebar-akcje">
+                    <button id="nav-plan" class="sidebar-btn active"><span class="material-symbols-outlined">calendar_month</span> Mój plan zajęć</button>
+                    <button id="nav-sale" class="sidebar-btn"><span class="material-symbols-outlined">meeting_room</span> Wyszukaj wolną salę</button>
+                    <button id="nav-prowadzacy" class="sidebar-btn"><span class="material-symbols-outlined">groups</span> Lista prowadzących</button>
+                    
+                    <div class="sidebar-divider" style="margin: 12px 0;"></div>
+
                     <button id="przycisk-motyw-wykladowca" class="sidebar-btn motyw">${document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span> Jasny motyw' : '<span class="material-symbols-outlined">dark_mode</span> Ciemny motyw'}</button>
                     <button id="przycisk-eksport-csv-wykladowca" class="sidebar-btn"><span class="material-symbols-outlined">download</span> Pobierz plan (CSV)</button>
                     <button id="przycisk-pokaz-haslo-wykladowca" class="sidebar-btn"><span class="material-symbols-outlined">key</span> Zmień hasło</button>

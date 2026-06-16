@@ -1,96 +1,120 @@
 
 function pokazPanelPlanisty(app) {
     var email = sessionStorage.getItem('email');
+    var imie = sessionStorage.getItem('imie');
+    var nazwisko = sessionStorage.getItem('nazwisko');
+    var pelneImie = (imie && nazwisko) ? `${imie} ${nazwisko}` : email;
 
     app.innerHTML = `
-        <div class="panel-kontener">
-            <div class="panel-naglowek">
-                <h2>Panel Planisty</h2>
-                <p>Zalogowano jako: <strong>${email}</strong></p>
-                <button id="przycisk-wyloguj" class="przycisk-maly">Wyloguj się</button>
-            </div>
+        <div class="panel-layout">
+            <aside class="panel-sidebar">
+                <p class="sidebar-tytul">Panel Planisty</p>
 
-            <div class="akcje-panelu">
-                <button id="przycisk-pokaz-haslo" class="przycisk-akcja">Zmień hasło</button>
-                <button id="przycisk-pokaz-csv" class="przycisk-akcja">Migracja danych (CSV)</button>
-                <button id="przycisk-pokaz-crud" class="przycisk-akcja">Zarządzanie strukturą (CRUD)</button>
-            </div>
-
-            <div id="sekcja-haslo" class="ukryta-sekcja hidden">
-                <h3>Zmiana hasła</h3>
-                <div id="komunikat-haslo" class="blad hidden"></div>
-                <div class="pole">
-                    <input type="password" id="stare-haslo" placeholder="Stare hasło">
-                </div>
-                <div class="pole">
-                    <input type="password" id="nowe-haslo" placeholder="Nowe hasło">
-                </div>
-                <button id="przycisk-zmien-haslo" class="przycisk-akcja">Potwierdź zmianę</button>
-            </div>
-
-            <div id="sekcja-csv" class="ukryta-sekcja hidden">
-                <h3>Masowy Import / Eksport danych (CSV)</h3>
-                <p style="font-size: 13px; color: var(--text-secondary);">Wybierz model danych z bazy systemu:</p>
-                <div class="pole">
-                    <select id="wybierz-model-csv" style="padding: 10px 12px; width: 100%; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--gray-medium); border-radius: 6px; font-family: 'Inter', sans-serif;">
-                        <option value="Przedmioty">Przedmioty</option>
-                        <option value="Sale">Sale</option>
-                        <option value="Pracownicy">Pracownicy</option>
-                        <option value="Grupy">Grupy</option>
-                        <option value="Zajecia">Zajęcia</option>
-                    </select>
-                </div>
-                <div style="display: flex; gap: 10px; margin-top: 16px;">
-                    <button id="btn-eksport-model" class="przycisk-akcja" style="flex: 1;">Eksportuj do CSV</button>
-                    <div style="flex: 1; border: 1px dashed var(--gray-medium); padding: 8px; text-align: center; border-radius: 6px;">
-                        <input type="file" id="plik-import-csv" accept=".csv" style="font-size: 13px; width: 100%; color: var(--text-primary);">
-                        <button id="btn-import-model" class="przycisk-maly" style="margin-top: 8px; width: 100%; background: var(--color-main);">Importuj plik CSV</button>
+                <div class="sidebar-info">
+                    <div class="sidebar-info-wiersz">
+                        <span class="sidebar-info-label">Zalogowano jako</span>
+                        <span class="sidebar-info-wartosc" style="font-weight: 600;">${pelneImie}</span>
+                    </div>
+                    <div class="sidebar-info-wiersz">
+                        <span class="sidebar-info-label">E-mail</span>
+                        <span class="sidebar-info-wartosc">${email}</span>
                     </div>
                 </div>
-                <div id="komunikat-csv" style="margin-top: 12px; font-weight: bold; font-size: 13px;"></div>
-            </div>
+                
+                <hr class="sidebar-divider">
+                
+                <div class="sidebar-akcje">
+                    <button id="przycisk-motyw-planista" class="sidebar-btn motyw">${document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span> Jasny motyw' : '<span class="material-symbols-outlined">dark_mode</span> Ciemny motyw'}</button>
+                    <button id="przycisk-pokaz-haslo-planista" class="sidebar-btn"><span class="material-symbols-outlined">key</span> Zmień hasło</button>
+                    <button id="przycisk-wyloguj-planista" class="sidebar-btn danger"><span class="material-symbols-outlined">logout</span> Wyloguj się</button>
+                </div>
+            </aside>
 
-            <div id="sekcja-crud" class="ukryta-sekcja hidden">
-                <h3>Zarządzanie strukturą uczelni (CRUD)</h3>
+            <main class="panel-content">
+                <!-- SEKCJA CRUD -->
+                <div id="sekcja-crud">
+                    <h2 style="margin-bottom: 20px; font-size: 22px;">Zarządzanie strukturą uczelni (CRUD)</h2>
+                    <div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
+                        <!-- Lewa Kolumna: Kontrolki i formularz -->
+                        <div style="flex: 1; min-width: 300px; max-width: 400px;">
+                            <div class="pole">
+                                <label><strong>Wybierz obszar zarządzania:</strong></label>
+                                <select id="wybierz-zasob-crud" style="padding: 10px 12px; width: 100%; margin-top: 5px; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--gray-medium); border-radius: 6px; font-family: 'Inter', sans-serif;">
+                                    <option value="subject">Przedmioty</option>
+                                    <option value="sala">Sale wykładowe</option>
+                                    <option value="pracownik">Pracownicy / Wykładowcy</option>
+                                    <option value="grupa">Grupy studenckie</option>
+                                    <option value="zajecia">Plan lekcji / Zajęcia</option>
+                                </select>
+                            </div>
 
-                <div class="pole">
-                    <label><strong>Wybierz obszar zarządzania:</strong></label>
-                    <select id="wybierz-zasob-crud" style="padding: 10px 12px; width: 100%; margin-top: 5px; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--gray-medium); border-radius: 6px; font-family: 'Inter', sans-serif;">
-                        <option value="subject">Przedmioty (api/CRUD/subject/)</option>
-                        <option value="sala">Sale wykładowe (api/CRUD/sala/)</option>
-                        <option value="pracownik">Pracownicy / Wykładowcy (api/CRUD/pracownik/)</option>
-                        <option value="grupa">Grupy studenckie (api/CRUD/grupa/)</option>
-                        <option value="zajecia">Plan lekcji / Zajęcia (api/CRUD/zajecia/)</option>
-                    </select>
+                            <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--gray-light);">
+
+                            <div id="kontener-formularza-crud">
+                            </div>
+
+                            <div id="komunikat-crud" style="margin-top: 16px; font-weight: bold; font-size: 13px;"></div>
+                            
+                            <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--gray-light);">
+                            
+                            <h3 style="font-size: 16px; margin-bottom: 12px;">Import / Eksport dla wybranego zasobu</h3>
+                            <div style="display: flex; gap: 10px;">
+                                <button id="btn-eksport-model" class="przycisk-akcja" style="flex: 1;">Eksportuj (CSV)</button>
+                                <div style="flex: 1; border: 1px dashed var(--gray-medium); padding: 8px; text-align: center; border-radius: 6px;">
+                                    <input type="file" id="plik-import-csv" accept=".csv" style="font-size: 13px; width: 100%; color: var(--text-primary);">
+                                    <button id="btn-import-model" class="przycisk-maly" style="margin-top: 8px; width: 100%; background: var(--color-main);">Importuj plik (CSV)</button>
+                                </div>
+                            </div>
+                            <div id="komunikat-csv" style="margin-top: 12px; font-weight: bold; font-size: 13px;"></div>
+                        </div>
+
+                        <!-- Pionowa kreska rozdzielająca -->
+                        <div style="width: 1px; background-color: var(--gray-light); align-self: stretch; min-height: 400px;"></div>
+
+                        <!-- Prawa Kolumna: Tabela wyników -->
+                        <div style="flex: 2; min-width: 400px; overflow-x: auto;">
+                            <div id="podglad-danych-kontener" class="hidden">
+                                <h3 id="naglowek-podgladu" style="margin-bottom: 12px;">Aktualna lista</h3>
+                                <table class="tabela-planu" id="tabela-wszystkie-rekordy">
+                                    <thead>
+                                        <tr id="naglowki-tabeli-crud">
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--gray-light);">
+                <!-- SEKCJA CSV ZOSTALA USUNIETA I PRZENIESIONA DO CRUD -->
 
-                <div id="kontener-formularza-crud" style="background: var(--bg-card); padding: 20px; border: 1px solid var(--gray-light); border-radius: 6px;">
+                <!-- ZMIANA HASŁA -->
+                <div id="sekcja-haslo-planista" class="content-sekcja hidden" style="margin-top: 30px;">
+                    <h3 style="margin-top:0; font-size: 16px;">Zmiana hasła</h3>
+                    <div id="komunikat-haslo" class="blad hidden" style="margin-bottom: 16px;"></div>
+                    <div class="pole">
+                        <input type="password" id="stare-haslo" placeholder="Stare hasło">
+                    </div>
+                    <div class="pole">
+                        <input type="password" id="nowe-haslo" placeholder="Nowe hasło">
+                    </div>
+                    <button id="przycisk-zmien-haslo" class="przycisk-akcja">Potwierdź zmianę</button>
                 </div>
-
-                <div id="komunikat-crud" style="margin-top: 16px; font-weight: bold; font-size: 13px;"></div>
-
-                <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--gray-light);">
-
-                <div id="podglad-danych-kontener" class="hidden">
-                    <h3 id="naglowek-podgladu">Aktualna lista</h3>
-                    <table class="tabela-planu" id="tabela-wszystkie-rekordy">
-                        <thead>
-                            <tr id="naglowki-tabeli-crud">
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            </main>
         </div>
     `;
 
-    // --- PODSTAWOWA NAWIGACJA PANELU ---
-    document.getElementById('przycisk-wyloguj').onclick = function() {
-        fetch('/api/auth/logout/', { method: 'POST', headers: { 'X-CSRFToken': window.CSRF_TOKEN } })
+    // Przełączanie motywu
+    document.getElementById('przycisk-motyw-planista').onclick = function() {
+        toggleMotyw();
+        this.innerHTML = document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span> Jasny motyw' : '<span class="material-symbols-outlined">dark_mode</span> Ciemny motyw';
+    };
+
+    // Wylogowywanie
+    document.getElementById('przycisk-wyloguj-planista').onclick = function() {
+        fetch('/api/auth/logout/', { method: 'POST', headers: { 'X-CSRFToken': window.CSRF_TOKEN }, credentials: 'same-origin' })
         .then(function() {
             sessionStorage.clear();
             history.pushState({}, '', '/logowanie/');
@@ -98,23 +122,12 @@ function pokazPanelPlanisty(app) {
         });
     };
 
-    document.getElementById('przycisk-pokaz-haslo').onclick = function() {
-        document.getElementById('sekcja-haslo').classList.toggle('hidden');
-        document.getElementById('sekcja-csv').classList.add('hidden');
-        document.getElementById('sekcja-crud').classList.add('hidden');
-    };
+    // Nawigacja góran została usunięta, ładujemy od razu zawartość.
+    przelaczZasobCrud();
 
-    document.getElementById('przycisk-pokaz-csv').onclick = function() {
-        document.getElementById('sekcja-csv').classList.toggle('hidden');
-        document.getElementById('sekcja-haslo').classList.add('hidden');
-        document.getElementById('sekcja-crud').classList.add('hidden');
-    };
-
-    document.getElementById('przycisk-pokaz-crud').onclick = function() {
-        document.getElementById('sekcja-crud').classList.toggle('hidden');
-        document.getElementById('sekcja-haslo').classList.add('hidden');
-        document.getElementById('sekcja-csv').classList.add('hidden');
-        przelaczZasobCrud();
+    // Przełączanie zmiany hasła
+    document.getElementById('przycisk-pokaz-haslo-planista').onclick = function() {
+        document.getElementById('sekcja-haslo-planista').classList.toggle('hidden');
     };
 
     document.getElementById('przycisk-zmien-haslo').onclick = function() {
@@ -137,6 +150,7 @@ function pokazPanelPlanisty(app) {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': window.CSRF_TOKEN
             },
+            credentials: 'same-origin',
             body: JSON.stringify({ old_password: stare, new_password: nowe })
         })
         .then(res => res.json())
@@ -299,12 +313,16 @@ function pokazPanelPlanisty(app) {
 
     // --- LOGIKA MIGRACJI CSV ---
     document.getElementById('btn-eksport-model').onclick = function() {
-        var model = document.getElementById('wybierz-model-csv').value;
+        var zasob = document.getElementById('wybierz-zasob-crud').value;
+        var mapowanie = { 'subject': 'Przedmioty', 'sala': 'Sale', 'pracownik': 'Pracownicy', 'grupa': 'Grupy', 'zajecia': 'Zajecia' };
+        var model = mapowanie[zasob];
         window.location.href = `/api/data/export/${model}/`;
     };
 
     document.getElementById('btn-import-model').onclick = function() {
-        var model = document.getElementById('wybierz-model-csv').value;
+        var zasob = document.getElementById('wybierz-zasob-crud').value;
+        var mapowanie = { 'subject': 'Przedmioty', 'sala': 'Sale', 'pracownik': 'Pracownicy', 'grupa': 'Grupy', 'zajecia': 'Zajecia' };
+        var model = mapowanie[zasob];
         var plikInput = document.getElementById('plik-import-csv');
         var komunikat = document.getElementById('komunikat-csv');
 
@@ -321,7 +339,10 @@ function pokazPanelPlanisty(app) {
 
         fetch(`/api/data/import/${model}/`, {
             method: 'POST',
-            headers: { 'X-CSRFToken': window.CSRF_TOKEN },
+            headers: {
+                'X-CSRFToken': window.CSRF_TOKEN
+            },
+            credentials: 'same-origin',
             body: formData
         })
         .then(res => res.json())
@@ -364,7 +385,7 @@ function pokazPanelPlanisty(app) {
                 <div class="pole"><input type="text" id="sub-nazwa" placeholder="Nazwa przedmiotu (np. Programowanie)"></div>
                 <div class="pole"><input type="text" id="sub-forma" placeholder="Forma (np. Wykład / Laboratorium)"></div>
                 <div class="pole"><input type="number" id="sub-godz" placeholder="Liczba godzin (np. 30)"></div>
-                <button id="btn-sub-add" class="przycisk-akcja" style="background: var(--color-success); margin-top:10px;">Dodaj obiekt (POST)</button>
+                <button id="btn-sub-add" class="przycisk-akcja" style="background: var(--color-success); margin-top:10px;">Dodaj obiekt</button>
             `;
             document.getElementById('btn-sub-add').onclick = function() {
                 wykonajZapytanieCrud('/api/CRUD/subject/', 'POST', {
@@ -512,7 +533,8 @@ function pokazPanelPlanisty(app) {
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': window.CSRF_TOKEN
-            }
+            },
+            credentials: 'same-origin'
         };
         if (metoda !== 'DELETE') {
             opcjeFetch.body = JSON.stringify(bodyObiekt);
@@ -544,11 +566,13 @@ function pokazPanelPlanisty(app) {
 
         tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color: var(--text-primary);">Ładowanie danych z bazy...</td></tr>';
 
-        fetch(`/api/CRUD/${zasob}/`)
-        .then(res => res.json())
-        .then(dane => {
-            if (dane.status !== 'success') {
-                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color: var(--color-error);">Nie udało się pobrać danych.</td></tr>';
+        fetch(`/api/CRUD/${zasob}/`, { credentials: 'same-origin' })
+        .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, body: data })))
+        .then(resObj => {
+            let dane = resObj.body;
+            if (!resObj.ok || dane.status !== 'success') {
+                let errMsg = dane.message || `Błąd HTTP: ${resObj.status}`;
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color: var(--color-error);">Nie udało się pobrać danych: ${errMsg}</td></tr>`;
                 return;
             }
 
@@ -679,7 +703,7 @@ function pokazPanelPlanisty(app) {
 
         select.innerHTML = '<option value="">Ładowanie opcji...</option>';
 
-        fetch(url)
+        fetch(url, { credentials: 'same-origin' })
         .then(res => res.json())
         .then(dane => {
             if (dane.status === 'success' && dane[kluczDanych]) {
