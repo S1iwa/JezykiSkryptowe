@@ -532,3 +532,76 @@ def api_CRUD_sala(request, sala_id=None):
         return JsonResponse({'status': 'success', 'message': 'Sala usunięta'})
 
     return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+
+# Pracownik
+@csrf_exempt
+def api_CRUD_pracownik(request, pracownik_id=None):
+    # ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola_sesja = request.session.get('zalogowana_rola')
+    if rola_sesja != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać pracownikami.'}, status=403)
+
+    # DODAWANIE NOWEGO PRACOWNIKA (POST)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        haslo = data.get('haslo')
+        if not haslo:
+            return JsonResponse({'status': 'error', 'message': 'Hasło jest wymagane'}, status=400)
+
+        nowy_pracownik = Pracownicy.objects.create(
+            stopien=data.get('stopien'),
+            nazwisko=data.get('nazwisko'),
+            imie=data.get('imie'),
+            email=data.get('email'),
+            nrtel=data.get('nrtel'),
+            haslo=make_password(haslo),
+            rola=data.get('rola')
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Pracownik dodany pomyślnie',
+            'id': nowy_pracownik.idpr
+        })
+
+    # EDYTOWANIE ISTNIEJĄCEGO PRACOWNIKA (PUT)
+    elif request.method == 'PUT':
+        if not pracownik_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID pracownika do edycji'}, status=400)
+
+        pracownik = Pracownicy.objects.filter(idpr=pracownik_id).first()
+        if not pracownik:
+            return JsonResponse({'status': 'error', 'message': 'Pracownik nie istnieje'}, status=404)
+
+        data = json.loads(request.body)
+
+        pracownik.stopien = data.get('stopien', pracownik.stopien)
+        pracownik.nazwisko = data.get('nazwisko', pracownik.nazwisko)
+        pracownik.imie = data.get('imie', pracownik.imie)
+        pracownik.email = data.get('email', pracownik.email)
+        pracownik.nrtel = data.get('nrtel', pracownik.nrtel)
+        pracownik.rola = data.get('rola', pracownik.rola)
+        
+        haslo = data.get('haslo')
+        if haslo:
+            pracownik.haslo = make_password(haslo)
+
+        pracownik.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Dane pracownika zaktualizowane'})
+
+    # USUWANIE PRACOWNIKA (DELETE)
+    elif request.method == 'DELETE':
+        if not pracownik_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID pracownika do usunięcia'}, status=400)
+
+        pracownik = Pracownicy.objects.filter(idpr=pracownik_id).first()
+        if not pracownik:
+            return JsonResponse({'status': 'error', 'message': 'Pracownik nie istnieje'}, status=404)
+
+        pracownik.delete()
+        return JsonResponse({'status': 'success', 'message': 'Pracownik usunięty'})
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
