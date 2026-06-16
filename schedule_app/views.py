@@ -1,4 +1,6 @@
 import json
+
+from django.db.models import Case, When, IntegerField
 from django.shortcuts import render
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth import logout
@@ -79,7 +81,21 @@ def _plan_studenta(student):
         Zajecia.objects
         .filter(idg__in=grupy_ids)
         .select_related('ids', 'ids__idb', 'idp', 'idpr', 'idg', 'idg__idk')
-        .order_by('dzien', 'godzrozp')
+        .annotate(
+            kolejnosc_dni=Case(
+                When(dzien='Poniedziałek', then=1),
+                When(dzien='Wtorek', then=2),
+                When(dzien='Środa', then=3),
+                When(dzien='Czwartek', then=4),
+                When(dzien='Piątek', then=5),
+                When(dzien='Sobota', then=6),
+                When(dzien='Niedziela', then=7),
+                default=8,
+                output_field=IntegerField(),
+            )
+        )
+
+        .order_by('kolejnosc_dni', 'godzrozp')
     )
 
     return [_serializuj_zajecia(z) for z in zajecia_qs]
@@ -93,7 +109,21 @@ def _plan_wykladowcy(pracownik):
         Zajecia.objects
         .filter(idpr=pracownik)
         .select_related('ids', 'ids__idb', 'idp', 'idpr', 'idg', 'idg__idk')
-        .order_by('dzien', 'godzrozp')
+        .annotate(
+            kolejnosc_dni=Case(
+                When(dzien='Poniedziałek', then=1),
+                When(dzien='Wtorek', then=2),
+                When(dzien='Środa', then=3),
+                When(dzien='Czwartek', then=4),
+                When(dzien='Piątek', then=5),
+                When(dzien='Sobota', then=6),
+                When(dzien='Niedziela', then=7),
+                default=8,
+                output_field=IntegerField(),
+            )
+        )
+
+        .order_by('kolejnosc_dni', 'godzrozp')
     )
 
     return [_serializuj_zajecia(z) for z in zajecia_qs]
@@ -109,6 +139,8 @@ def api_login(request):
         data = json.loads(request.body)
         email_input = data.get('email')
         password_input = data.get('password')
+
+        print("dane z frontu:", data)
 
         if not email_input or not password_input:
             return JsonResponse({'status': 'error', 'message': 'Email i hasło są wymagane'}, status=400)
