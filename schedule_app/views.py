@@ -5,6 +5,11 @@ from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
+import pandas as pd
+import numpy as np
+from django.apps import apps
+from django.http import HttpResponse
+#For all buttons
 
 # Funkcje pomocnicze – pobierają plan zajęć
 
@@ -67,7 +72,7 @@ def _plan_studenta(student):
         .filter(idst=student)
         .select_related('idg')
     )
-    grupy_ids = [p.idg_id for p in przypisy]
+    grupy_ids = [p.idg.pk for p in przypisy]
 
     # Pobieramy zajęcia tych grup z wszystkimi powiązanymi danymi jednym zapytaniem
     zajecia_qs = (
@@ -229,12 +234,16 @@ def api_find_the_audience(request):
     if request.method != 'GET':
         return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
 
+    rola_z_sesji = request.session.get('zalogowana_rola')
+    if not rola_z_sesji:
+        return JsonResponse({'status': 'error', 'message': 'Musisz być zalogowany'}, status=401)
+
     try:
         sale = Sale.objects.select_related('idb').all()
 
         wynik = []
         for sala in sale:
-            # --- Dane jawne (odkryte) ---
+            # Dane jawne
             budynek = sala.idb
             dane_sali = {
                 'ids': sala.ids,
@@ -245,7 +254,7 @@ def api_find_the_audience(request):
                     'idb': budynek.idb,
                     'nazwab': budynek.nazwab,
                     'adresb': budynek.adresb,},
-                # --- Dane ukryte (zakryte) – kiedy sala jest zajęta ---
+                # Dane ukryte (zakryte) – kiedy sala jest zajęta
                 'zajecia': [
                     {
                         'dzien': z.dzien,
@@ -269,12 +278,10 @@ def api_professors_information(request):
     if request.method != 'GET':
         return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
 
-    # Tylko zalogowany student ma dostęp
+    # Tylko zalogowany użytkownik ma dostęp
     rola_z_sesji = request.session.get('zalogowana_rola')
     if not rola_z_sesji:
         return JsonResponse({'status': 'error', 'message': 'Musisz być zalogowany'}, status=401)
-    if rola_z_sesji != 'student':
-        return JsonResponse({'status': 'error', 'message': 'Brak uprawnień – tylko dla studentów'}, status=403)
 
     try:
         nazwisko_param = request.GET.get('nazwisko', '').strip()
@@ -333,3 +340,468 @@ def api_professors_information(request):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Błąd serwera: {str(e)}'}, status=500)
+
+
+# Export CSV dla dowolnego modelu
+def api_export_csv(request, model_name):
+    if request.method != 'GET':
+        return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+    try:
+        model = apps.get_model('schedule_app', model_name)
+    except LookupError:
+        return JsonResponse({'status': 'error', 'message': f'Model {model_name} nie istnieje'}, status=404)
+
+    data = list(model.objects.all().values())
+    if not data:
+        return JsonResponse({'status': 'error', 'message': 'Brak danych do eksportu'}, status=404)
+
+    df = pd.DataFrame(data)
+
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="{model_name}.csv"'
+
+    df.to_csv(path_or_buf=response, index=False, encoding='utf-8')
+
+    return response
+
+
+# Import CSV dla dowolnego modelu
+@csrf_exempt
+def api_import_csv(request, model_name):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+    try:
+        model = apps.get_model('schedule_app', model_name)
+    except LookupError:
+        return JsonResponse({'status': 'error', 'message': f'Model {model_name} nie istnieje'}, status=404)
+
+    if 'file' not in request.FILES:
+        return JsonResponse({'status': 'error', 'message': 'Brak pliku w żądaniu'}, status=400)
+
+    file = request.FILES['file']
+    if not file.name.endswith('.csv'):
+        return JsonResponse({'status': 'error', 'message': 'Plik musi być w formacie CSV'}, status=400)
+
+    try:
+        df = pd.read_csv(file)
+        df = df.replace({np.nan: None})
+
+        success_count = 0
+        skipped_records = []
+
+        for index, row in df.iterrows():
+            row_dict = row.to_dict()
+            try:
+                model.objects.create(**row_dict)
+                success_count += 1
+            except Exception as e:
+                skipped_records.append({'row': index + 2, 'data': row_dict, 'reason': str(e)})
+
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Import zakończony. Zaimportowano: {success_count}. Pominięto: {len(skipped_records)}',
+            'skipped': skipped_records
+        })
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Błąd podczas przetwarzania pliku: {str(e)}'}, status=500)
+
+# Planista
+# Przedmioty
+@csrf_exempt
+def api_CRUD_subject(request, przedmiot_id=None):
+    # 1. ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola = request.session.get('zalogowana_rola')
+    if rola != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać przedmiotami.'}, status=403)
+
+    # DODAWANIE NOWEGO PRZEDMIOTU (POST)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        nowy_przedmiot = Przedmioty.objects.create(
+            nazwap=data.get('nazwap'),
+            formap=data.get('formap'),
+            lbgodz=data.get('lbgodz')
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Przedmiot dodany pomyślnie',
+            'id': nowy_przedmiot.idp
+        })
+
+    # EDYTOWANIE ISTNIEJĄCEGO PRZEDMIOTU (PUT)
+    elif request.method == 'PUT':
+        if not przedmiot_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID przedmiotu do edycji'}, status=400)
+
+        przedmiot = Przedmioty.objects.filter(idp=przedmiot_id).first()
+        if not przedmiot:
+            return JsonResponse({'status': 'error', 'message': 'Przedmiot nie istnieje'}, status=404)
+
+        data = json.loads(request.body)
+
+        # Zmieniamy dane. Jeśli jakiegoś pola nie wysłano w JSON, zostawiamy stare (drugi parametr get)
+        przedmiot.nazwap = data.get('nazwap', przedmiot.nazwap)
+        przedmiot.formap = data.get('formap', przedmiot.formap)
+        przedmiot.lbgodz = data.get('lbgodz', przedmiot.lbgodz)
+        przedmiot.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Przedmiot zaktualizowany'})
+
+    # USUWANIE PRZEDMIOTU (DELETE)
+    elif request.method == 'DELETE':
+        if not przedmiot_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID przedmiotu do usunięcia'}, status=400)
+
+        przedmiot = Przedmioty.objects.filter(idp=przedmiot_id).first()
+        if not przedmiot:
+            return JsonResponse({'status': 'error', 'message': 'Przedmiot nie istnieje'}, status=404)
+
+        przedmiot.delete()
+        return JsonResponse({'status': 'success', 'message': 'Przedmiot usunięty'})
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+# Sala
+@csrf_exempt
+def api_CRUD_sala(request, sala_id=None):
+    # ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola = request.session.get('zalogowana_rola')
+    if rola != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać salami.'}, status=403)
+
+    # DODAWANIE NOWEJ SALI (POST)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        # pobieramy obiekt Budynki na podstawie przesłanego ID
+        budynek = Budynki.objects.filter(idb=data.get('idb')).first()
+        if not budynek:
+            return JsonResponse({'status': 'error', 'message': 'Podany budynek nie istnieje'}, status=404)
+
+        nowa_sala = Sale.objects.create(
+            numers=data.get('numers'),
+            typs=data.get('typs'),
+            pojemnosc=data.get('pojemnosc'),
+            idb=budynek
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Sala dodana pomyślnie',
+            'id': nowa_sala.ids
+        })
+
+    # EDYTOWANIE ISTNIEJĄCEJ SALI (PUT)
+    elif request.method == 'PUT':
+        if not sala_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID sali do edycji'}, status=400)
+
+        sala = Sale.objects.filter(ids=sala_id).first()
+        if not sala:
+            return JsonResponse({'status': 'error', 'message': 'Sala nie istnieje'}, status=404)
+
+        data = json.loads(request.body)
+
+        # Jeśli przesłano nowe idb, zamieniamy budynek
+        if 'idb' in data:
+            budynek = Budynki.objects.filter(idb=data['idb']).first()
+            if not budynek:
+                return JsonResponse({'status': 'error', 'message': 'Podany budynek nie istnieje'}, status=404)
+            sala.idb = budynek
+
+        sala.numers = data.get('numers', sala.numers)
+        sala.typs = data.get('typs', sala.typs)
+        sala.pojemnosc = data.get('pojemnosc', sala.pojemnosc)
+        sala.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Sala zaktualizowana'})
+
+    # USUWANIE SALI (DELETE)
+    elif request.method == 'DELETE':
+        if not sala_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID sali do usunięcia'}, status=400)
+
+        sala = Sale.objects.filter(ids=sala_id).first()
+        if not sala:
+            return JsonResponse({'status': 'error', 'message': 'Sala nie istnieje'}, status=404)
+
+        sala.delete()
+        return JsonResponse({'status': 'success', 'message': 'Sala usunięta'})
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+
+# Pracownik
+@csrf_exempt
+def api_CRUD_pracownik(request, pracownik_id=None):
+    # ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola_sesja = request.session.get('zalogowana_rola')
+    if rola_sesja != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać pracownikami.'}, status=403)
+
+    # DODAWANIE NOWEGO PRACOWNIKA (POST)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        haslo = data.get('haslo')
+        if not haslo:
+            return JsonResponse({'status': 'error', 'message': 'Hasło jest wymagane'}, status=400)
+
+        nowy_pracownik = Pracownicy.objects.create(
+            stopien=data.get('stopien'),
+            nazwisko=data.get('nazwisko'),
+            imie=data.get('imie'),
+            email=data.get('email'),
+            nrtel=data.get('nrtel'),
+            haslo=make_password(haslo),
+            rola=data.get('rola')
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Pracownik dodany pomyślnie',
+            'id': nowy_pracownik.idpr
+        })
+
+    # EDYTOWANIE ISTNIEJĄCEGO PRACOWNIKA (PUT)
+    elif request.method == 'PUT':
+        if not pracownik_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID pracownika do edycji'}, status=400)
+
+        pracownik = Pracownicy.objects.filter(idpr=pracownik_id).first()
+        if not pracownik:
+            return JsonResponse({'status': 'error', 'message': 'Pracownik nie istnieje'}, status=404)
+
+        data = json.loads(request.body)
+
+        pracownik.stopien = data.get('stopien', pracownik.stopien)
+        pracownik.nazwisko = data.get('nazwisko', pracownik.nazwisko)
+        pracownik.imie = data.get('imie', pracownik.imie)
+        pracownik.email = data.get('email', pracownik.email)
+        pracownik.nrtel = data.get('nrtel', pracownik.nrtel)
+        pracownik.rola = data.get('rola', pracownik.rola)
+        
+        haslo = data.get('haslo')
+        if haslo:
+            pracownik.haslo = make_password(haslo)
+
+        pracownik.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Dane pracownika zaktualizowane'})
+
+    # USUWANIE PRACOWNIKA (DELETE)
+    elif request.method == 'DELETE':
+        if not pracownik_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID pracownika do usunięcia'}, status=400)
+
+        pracownik = Pracownicy.objects.filter(idpr=pracownik_id).first()
+        if not pracownik:
+            return JsonResponse({'status': 'error', 'message': 'Pracownik nie istnieje'}, status=404)
+
+        pracownik.delete()
+        return JsonResponse({'status': 'success', 'message': 'Pracownik usunięty'})
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+
+# Grupa
+@csrf_exempt
+def api_CRUD_grupa(request, grupa_id=None):
+    # ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola_sesja = request.session.get('zalogowana_rola')
+    if rola_sesja != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać grupami.'}, status=403)
+
+    # DODAWANIE NOWEJ GRUPY (POST)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        # idk to Foreign Key – pobieramy obiekt Kierunki
+        kierunek = Kierunki.objects.filter(idk=data.get('idk')).first()
+        if not kierunek:
+            return JsonResponse({'status': 'error', 'message': 'Podany kierunek nie istnieje'}, status=404)
+
+        nowa_grupa = Grupy.objects.create(
+            idk=kierunek,
+            rokstudiow=data.get('rokstudiow'),
+            semestr=data.get('semestr'),
+            rokakadem=data.get('rokakadem'),
+            liczbaos=data.get('liczbaos'),
+            opis=data.get('opis', '')
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Grupa dodana pomyślnie',
+            'id': nowa_grupa.idg
+        })
+
+    # EDYTOWANIE ISTNIEJĄCEJ GRUPY (PUT)
+    elif request.method == 'PUT':
+        if not grupa_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID grupy do edycji'}, status=400)
+
+        grupa = Grupy.objects.filter(idg=grupa_id).first()
+        if not grupa:
+            return JsonResponse({'status': 'error', 'message': 'Grupa nie istnieje'}, status=404)
+
+        data = json.loads(request.body)
+
+        # Jeśli przesłano nowe idk, zamieniamy FK
+        if 'idk' in data:
+            kierunek = Kierunki.objects.filter(idk=data['idk']).first()
+            if not kierunek:
+                return JsonResponse({'status': 'error', 'message': 'Podany kierunek nie istnieje'}, status=404)
+            grupa.idk = kierunek
+
+        grupa.rokstudiow = data.get('rokstudiow', grupa.rokstudiow)
+        grupa.semestr = data.get('semestr', grupa.semestr)
+        grupa.rokakadem = data.get('rokakadem', grupa.rokakadem)
+        grupa.liczbaos = data.get('liczbaos', grupa.liczbaos)
+        grupa.opis = data.get('opis', grupa.opis)
+
+        grupa.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Dane grupy zaktualizowane'})
+
+    # USUWANIE GRUPY (DELETE)
+    elif request.method == 'DELETE':
+        if not grupa_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID grupy do usunięcia'}, status=400)
+
+        grupa = Grupy.objects.filter(idg=grupa_id).first()
+        if not grupa:
+            return JsonResponse({'status': 'error', 'message': 'Grupa nie istnieje'}, status=404)
+
+        grupa.delete()
+        return JsonResponse({'status': 'success', 'message': 'Grupa usunięta'})
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+
+# Zajęcia
+@csrf_exempt
+def api_CRUD_zajecia(request, zajecia_id=None):
+    # ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola_sesja = request.session.get('zalogowana_rola')
+    if rola_sesja != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać zajęciami.'}, status=403)
+
+    # POBIERANIE ZAJĘĆ (GET)
+    if request.method == 'GET':
+        if zajecia_id:
+            zajecia = Zajecia.objects.select_related('ids', 'ids__idb', 'idp', 'idpr', 'idg', 'idg__idk').filter(idz=zajecia_id).first()
+            if not zajecia:
+                return JsonResponse({'status': 'error', 'message': 'Zajęcia nie istnieją'}, status=404)
+            return JsonResponse({'status': 'success', 'zajecia': _serializuj_zajecia(zajecia)})
+        else:
+            # Pobieramy wszystkie zajęcia, opcjonalnie można by dodać paginację lub filtry
+            zajecia_qs = Zajecia.objects.select_related('ids', 'ids__idb', 'idp', 'idpr', 'idg', 'idg__idk').all()
+            wynik = [_serializuj_zajecia(z) for z in zajecia_qs]
+            return JsonResponse({'status': 'success', 'zajecia': wynik})
+
+    # DODAWANIE NOWYCH ZAJĘĆ (POST)
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+
+        # Pobieranie kluczy obcych i walidacja
+        sala = Sale.objects.filter(ids=data.get('ids')).first()
+        przedmiot = Przedmioty.objects.filter(idp=data.get('idp')).first()
+        pracownik = Pracownicy.objects.filter(idpr=data.get('idpr')).first()
+        grupa = Grupy.objects.filter(idg=data.get('idg')).first()
+
+        bledy = []
+        if not sala: bledy.append('Podana sala nie istnieje')
+        if not przedmiot: bledy.append('Podany przedmiot nie istnieje')
+        if not pracownik: bledy.append('Podany wykładowca nie istnieje')
+        if not grupa: bledy.append('Podana grupa nie istnieje')
+
+        if bledy:
+            return JsonResponse({'status': 'error', 'message': 'Błąd walidacji kluczy obcych', 'errors': bledy}, status=404)
+
+        nowe_zajecia = Zajecia.objects.create(
+            dzien=data.get('dzien'),
+            godzrozp=data.get('godzrozp'),
+            godzzak=data.get('godzzak'),
+            uwagi=data.get('uwagi', ''),
+            ids=sala,
+            idp=przedmiot,
+            idpr=pracownik,
+            idg=grupa
+        )
+        
+        # Aby zwrócić szczegóły nowo dodanych zajęć, ładujemy je z relacjami
+        zajecia_z_bazy = Zajecia.objects.select_related('ids', 'ids__idb', 'idp', 'idpr', 'idg', 'idg__idk').get(idz=nowe_zajecia.idz)
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Zajęcia dodane pomyślnie',
+            'zajecia': _serializuj_zajecia(zajecia_z_bazy)
+        })
+
+    # EDYTOWANIE ISTNIEJĄCYCH ZAJĘĆ (PUT)
+    elif request.method == 'PUT':
+        if not zajecia_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID zajęć do edycji'}, status=400)
+
+        zajecia = Zajecia.objects.filter(idz=zajecia_id).first()
+        if not zajecia:
+            return JsonResponse({'status': 'error', 'message': 'Zajęcia nie istnieją'}, status=404)
+
+        data = json.loads(request.body)
+
+        # Walidacja ewentualnych zmian kluczy obcych
+        if 'ids' in data:
+            sala = Sale.objects.filter(ids=data['ids']).first()
+            if not sala: return JsonResponse({'status': 'error', 'message': 'Podana sala nie istnieje'}, status=404)
+            zajecia.ids = sala
+            
+        if 'idp' in data:
+            przedmiot = Przedmioty.objects.filter(idp=data['idp']).first()
+            if not przedmiot: return JsonResponse({'status': 'error', 'message': 'Podany przedmiot nie istnieje'}, status=404)
+            zajecia.idp = przedmiot
+            
+        if 'idpr' in data:
+            pracownik = Pracownicy.objects.filter(idpr=data['idpr']).first()
+            if not pracownik: return JsonResponse({'status': 'error', 'message': 'Podany pracownik nie istnieje'}, status=404)
+            zajecia.idpr = pracownik
+            
+        if 'idg' in data:
+            grupa = Grupy.objects.filter(idg=data['idg']).first()
+            if not grupa: return JsonResponse({'status': 'error', 'message': 'Podana grupa nie istnieje'}, status=404)
+            zajecia.idg = grupa
+
+        zajecia.dzien = data.get('dzien', zajecia.dzien)
+        zajecia.godzrozp = data.get('godzrozp', zajecia.godzrozp)
+        zajecia.godzzak = data.get('godzzak', zajecia.godzzak)
+        zajecia.uwagi = data.get('uwagi', zajecia.uwagi)
+
+        zajecia.save()
+        
+        # Zwracanie zaktualizowanych zajęć
+        zaktualizowane_zajecia = Zajecia.objects.select_related('ids', 'ids__idb', 'idp', 'idpr', 'idg', 'idg__idk').get(idz=zajecia.idz)
+
+        return JsonResponse({
+            'status': 'success', 
+            'message': 'Dane zajęć zaktualizowane',
+            'zajecia': _serializuj_zajecia(zaktualizowane_zajecia)
+        })
+
+    # USUWANIE ZAJĘĆ (DELETE)
+    elif request.method == 'DELETE':
+        if not zajecia_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID zajęć do usunięcia'}, status=400)
+
+        zajecia = Zajecia.objects.filter(idz=zajecia_id).first()
+        if not zajecia:
+            return JsonResponse({'status': 'error', 'message': 'Zajęcia nie istnieją'}, status=404)
+
+        zajecia.delete()
+        return JsonResponse({'status': 'success', 'message': 'Zajęcia usunięte'})
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
