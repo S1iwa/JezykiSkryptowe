@@ -805,3 +805,8 @@ def api_CRUD_zajecia(request, zajecia_id=None):
         return JsonResponse({'status': 'success', 'message': 'Zajęcia usunięte'})
 
     return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+
+# Funkcja łącząca Django z index.html
+def index(request):
+    return render(request, 'schedule_app/index.html')
