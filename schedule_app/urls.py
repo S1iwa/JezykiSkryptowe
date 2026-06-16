@@ -31,4 +31,7 @@ urlpatterns = [
     path('api/accounts/manage/<str:typ_konta>/<int:konto_id>/', views.api_add_delete_account, name='api_add_delete_account_delete'),
     path('api/reports/rooms-load/', views.api_raport_obciazenia_sal, name='api_raport_obciazenia_sal'),
     path('api/reports/lecturers-load/', views.api_raport_obciazenia_wykladowcow, name='api_raport_obciazenia_wykladowcow'),
+
+    path('api/CRUD/budynek/', views.api_get_budynki, name='api_get_budynki'),
+    path('api/CRUD/kierunek/', views.api_get_kierunki, name='api_get_kierunki'),
 ]
