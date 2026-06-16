@@ -147,6 +147,10 @@ def api_login(request):
 
         #   Szukamy najpierw w tabeli Studenci
         student = Studenci.objects.filter(email=email_input).first()
+        print("Znaleziono studenta:", student)
+        if student:
+            print("Hash studenta z bazy:", student.haslo)
+            print("check_password student:", check_password(password_input, student.haslo))
         if student and check_password(password_input, student.haslo):
 
             request.session['zalogowany_email'] = student.email
@@ -162,6 +166,10 @@ def api_login(request):
 
         #   Jeśli to nie student, szukamy w tabeli Pracownicy
         pracownik = Pracownicy.objects.filter(email=email_input).first()
+        print("Znaleziono pracownika:", pracownik)
+        if pracownik:
+            print("Hash pracownika z bazy:", pracownik.haslo)
+            print("check_password pracownik:", check_password(password_input, pracownik.haslo))
         if pracownik and check_password(password_input, pracownik.haslo):
             # Sprawdzamy wartość w kolumnie 'role' (wykladowca / planista)
             rola_pracownika = pracownik.rola.lower()  # Zabezpieczenie przed wielkimi literami
