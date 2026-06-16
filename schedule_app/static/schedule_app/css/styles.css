@@ -1,0 +1,102 @@
+.formularz-logowania {
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 32px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+.pole {
+    margin-bottom: 16px;
+}
+.pole label {
+    display: block;
+    margin-bottom: 4px;
+}
+.pole input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+button {
+    width: 100%;
+    padding: 10px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.blad {
+    color: red;
+    margin-bottom: 16px;
+}
+.hidden {
+    display: none;
+}
+
+.panel-kontener {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+}
+.panel-naglowek {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+.przycisk-maly {
+    width: auto;
+    padding: 8px 16px;
+    background: #dc2626;
+    font-size: 14px;
+}
+.tabela-planu {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.tabela-planu th, .tabela-planu td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+.tabela-planu th {
+    background-color: #f8fafc;
+    font-weight: bold;
+    color: #333;
+}
+.tabela-planu tr:hover {
+    background-color: #f1f5f9;
+}
+.akcje-panelu {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.przycisk-akcja {
+    padding: 8px 16px;
+    background: #4b5563;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.przycisk-akcja:hover {
+    background: #374151;
+}
+
+.ukryta-sekcja {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+
