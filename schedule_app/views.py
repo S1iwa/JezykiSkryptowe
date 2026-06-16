@@ -234,12 +234,16 @@ def api_find_the_audience(request):
     if request.method != 'GET':
         return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
 
+    rola_z_sesji = request.session.get('zalogowana_rola')
+    if not rola_z_sesji:
+        return JsonResponse({'status': 'error', 'message': 'Musisz być zalogowany'}, status=401)
+
     try:
         sale = Sale.objects.select_related('idb').all()
 
         wynik = []
         for sala in sale:
-            # --- Dane jawne (odkryte) ---
+            # Dane jawne
             budynek = sala.idb
             dane_sali = {
                 'ids': sala.ids,
@@ -250,7 +254,7 @@ def api_find_the_audience(request):
                     'idb': budynek.idb,
                     'nazwab': budynek.nazwab,
                     'adresb': budynek.adresb,},
-                # --- Dane ukryte (zakryte) – kiedy sala jest zajęta ---
+                # Dane ukryte (zakryte) – kiedy sala jest zajęta
                 'zajecia': [
                     {
                         'dzien': z.dzien,
@@ -274,12 +278,10 @@ def api_professors_information(request):
     if request.method != 'GET':
         return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
 
-    # Tylko zalogowany student ma dostęp
+    # Tylko zalogowany użytkownik ma dostęp
     rola_z_sesji = request.session.get('zalogowana_rola')
     if not rola_z_sesji:
         return JsonResponse({'status': 'error', 'message': 'Musisz być zalogowany'}, status=401)
-    if rola_z_sesji != 'student':
-        return JsonResponse({'status': 'error', 'message': 'Brak uprawnień – tylko dla studentów'}, status=403)
 
     try:
         nazwisko_param = request.GET.get('nazwisko', '').strip()
@@ -803,5 +805,3 @@ def api_CRUD_zajecia(request, zajecia_id=None):
         return JsonResponse({'status': 'success', 'message': 'Zajęcia usunięte'})
 
     return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
-
-
