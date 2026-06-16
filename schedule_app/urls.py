@@ -7,4 +7,5 @@ urlpatterns = [
     path('api/auth/change_password/', views.api_change_password, name='api_change_password'),
     path('api/schedule/find-audience/', views.api_find_the_audience, name='api_find_the_audience'),
     path('api/students/professors-information/', views.api_professors_information, name='api_professors_information'),
+    path('api/CRUD/subject/', views.api_CRUD_subject, name='api_CRUD_subject'),
 ]

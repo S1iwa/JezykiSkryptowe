@@ -67,7 +67,7 @@ def _plan_studenta(student):
         .filter(idst=student)
         .select_related('idg')
     )
-    grupy_ids = [p.idg_id for p in przypisy]
+    grupy_ids = [p.idg.pk for p in przypisy]
 
     # Pobieramy zajęcia tych grup z wszystkimi powiązanymi danymi jednym zapytaniem
     zajecia_qs = (
@@ -333,3 +333,60 @@ def api_professors_information(request):
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Błąd serwera: {str(e)}'}, status=500)
+
+# Planista
+@csrf_exempt
+def api_CRUD_subject(request, przedmiot_id=None):
+    # 1. ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola = request.session.get('zalogowana_rola')
+    if rola != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać przedmiotami.'}, status=403)
+
+    # DODAWANIE NOWEGO PRZEDMIOTU (POST)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        nowy_przedmiot = Przedmioty.objects.create(
+            nazwap=data.get('nazwap'),
+            formap=data.get('formap'),
+            lbgodz=data.get('lbgodz')
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Przedmiot dodany pomyślnie',
+            'id': nowy_przedmiot.idp
+        })
+
+    # EDYTOWANIE ISTNIEJĄCEGO PRZEDMIOTU (PUT)
+    elif request.method == 'PUT':
+        if not przedmiot_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID przedmiotu do edycji'}, status=400)
+
+        przedmiot = Przedmioty.objects.filter(idp=przedmiot_id).first()
+        if not przedmiot:
+            return JsonResponse({'status': 'error', 'message': 'Przedmiot nie istnieje'}, status=404)
+
+        data = json.loads(request.body)
+
+        # Zmieniamy dane. Jeśli jakiegoś pola nie wysłano w JSON, zostawiamy stare (drugi parametr get)
+        przedmiot.nazwap = data.get('nazwap', przedmiot.nazwap)
+        przedmiot.formap = data.get('formap', przedmiot.formap)
+        przedmiot.lbgodz = data.get('lbgodz', przedmiot.lbgodz)
+        przedmiot.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Przedmiot zaktualizowany'})
+
+    # USUWANIE PRZEDMIOTU (DELETE)
+    elif request.method == 'DELETE':
+        if not przedmiot_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID przedmiotu do usunięcia'}, status=400)
+
+        przedmiot = Przedmioty.objects.filter(idp=przedmiot_id).first()
+        if not przedmiot:
+            return JsonResponse({'status': 'error', 'message': 'Przedmiot nie istnieje'}, status=404)
+
+        przedmiot.delete()
+        return JsonResponse({'status': 'success', 'message': 'Przedmiot usunięty'})
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
