@@ -117,6 +117,48 @@ function pokazPanelPlanisty(app) {
         przelaczZasobCrud();
     };
 
+    document.getElementById('przycisk-zmien-haslo').onclick = function() {
+        var stare = document.getElementById('stare-haslo').value;
+        var nowe = document.getElementById('nowe-haslo').value;
+        var komunikat = document.getElementById('komunikat-haslo');
+        
+        komunikat.classList.add('hidden');
+        
+        if (!stare || !nowe) {
+            komunikat.textContent = 'Wypełnij oba pola.';
+            komunikat.classList.remove('hidden');
+            komunikat.style.color = 'var(--color-error)';
+            return;
+        }
+
+        fetch('/api/auth/change_password/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': window.CSRF_TOKEN
+            },
+            body: JSON.stringify({ old_password: stare, new_password: nowe })
+        })
+        .then(res => res.json())
+        .then(dane => {
+            komunikat.classList.remove('hidden');
+            if (dane.status === 'success') {
+                komunikat.textContent = 'Hasło zostało zmienione!';
+                komunikat.style.color = 'var(--color-success)';
+                document.getElementById('stare-haslo').value = '';
+                document.getElementById('nowe-haslo').value = '';
+            } else {
+                komunikat.textContent = dane.message || 'Wystąpił błąd.';
+                komunikat.style.color = 'var(--color-error)';
+            }
+        })
+        .catch(err => {
+            komunikat.textContent = 'Błąd połączenia z serwerem.';
+            komunikat.classList.remove('hidden');
+            komunikat.style.color = 'var(--color-error)';
+        });
+    };
+
     // --- LOGIKA EDYCJI W WIERSZACH ---
     window.odblokujEdycje = function(id) {
         var zasob = document.getElementById('wybierz-zasob-crud').value;

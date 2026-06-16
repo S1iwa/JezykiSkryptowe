@@ -138,6 +138,7 @@
 
 .panel-naglowek {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     border-bottom: 2px solid var(--gray-light);
@@ -147,6 +148,7 @@
 
 .akcje-panelu {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 20px;
 }
