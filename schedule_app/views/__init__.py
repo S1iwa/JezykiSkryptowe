@@ -3,6 +3,7 @@ from .auth_password import *
 from .CRUD import *
 from .filter_functions import *
 from .csv_import_export import *
+from .geters import *
 
 
 # Funkcja łącząca Django z index.html

@@ -1,6 +1,141 @@
 from .helping_functions import *
 from .helping_functions import _serializuj_zajecia
 
+@csrf_exempt
+def api_CRUD_budynki(request, budynek_id=None):
+    # ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola = request.session.get('zalogowana_rola')
+    if rola != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać budynkami.'}, status=403)
+
+    # DODAWANIE NOWEGO BUDYNKU (POST)
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+
+        wymagane_pola = ['nazwab', 'adresb']
+        brakujace = [pole for pole in wymagane_pola if not data.get(pole)]
+        if brakujace:
+            return JsonResponse({'status': 'error', 'message': f'Brakujące pola: {", ".join(brakujace)}'}, status=400)
+
+        nowy_budynek = Budynki.objects.create(
+            nazwab=data.get('nazwab'),
+            adresb=data.get('adresb')
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Budynek dodany pomyślnie',
+            'id': nowy_budynek.idb
+        })
+
+    # EDYTOWANIE ISTNIEJĄCEGO BUDYNKU (PUT)
+    elif request.method == 'PUT':
+        if not budynek_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID budynku do edycji'}, status=400)
+
+        budynek = Budynki.objects.filter(idb=budynek_id).first()
+        if not budynek:
+            return JsonResponse({'status': 'error', 'message': 'Budynek nie istnieje'}, status=404)
+
+        data = json.loads(request.body)
+
+        budynek.nazwab = data.get('nazwab', budynek.nazwab)
+        budynek.adresb = data.get('adresb', budynek.adresb)
+        budynek.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Budynek zaktualizowany'})
+
+    # USUWANIE BUDYNKU (DELETE)
+    elif request.method == 'DELETE':
+        if not budynek_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID budynku do usunięcia'}, status=400)
+
+        budynek = Budynki.objects.filter(idb=budynek_id).first()
+        if not budynek:
+            return JsonResponse({'status': 'error', 'message': 'Budynek nie istnieje'}, status=404)
+
+        budynek.delete()
+        return JsonResponse({'status': 'success', 'message': 'Budynek usunięty'})
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
+
+
+@csrf_exempt
+def api_CRUD_kierunki(request, kierunek_id=None):
+    # ZABEZPIECZENIE: Sprawdzamy, czy to na pewno planista
+    rola = request.session.get('zalogowana_rola')
+    if rola != 'planista':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Brak uprawnień. Tylko planista może zarządzać kierunkami.'}, status=403)
+
+    # DODAWANIE NOWEGO KIERUNKU (POST)
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+
+        wymagane_pola = ['nazwak', 'rokstartu', 'idw']
+        brakujace = [pole for pole in wymagane_pola if not data.get(pole)]
+        if brakujace:
+            return JsonResponse({'status': 'error', 'message': f'Brakujące pola: {", ".join(brakujace)}'}, status=400)
+
+        wydzial = Wydzialy.objects.filter(idw=data.get('idw')).first()
+        if not wydzial:
+            return JsonResponse({'status': 'error', 'message': 'Podany wydział nie istnieje'}, status=404)
+
+        if Kierunki.objects.filter(idw=wydzial, nazwak=data.get('nazwak')).exists():
+            return JsonResponse({'status': 'error', 'message': 'Kierunek o tej nazwie już istnieje na tym wydziale'}, status=409)
+
+        nowy_kierunek = Kierunki.objects.create(
+            nazwak=data.get('nazwak'),
+            rokstartu=data.get('rokstartu'),
+            idw=wydzial
+        )
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Kierunek dodany pomyślnie',
+            'id': nowy_kierunek.idk
+        })
+
+    # EDYTOWANIE ISTNIEJĄCEGO KIERUNKU (PUT)
+    elif request.method == 'PUT':
+        if not kierunek_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID kierunku do edycji'}, status=400)
+
+        kierunek = Kierunki.objects.filter(idk=kierunek_id).first()
+        if not kierunek:
+            return JsonResponse({'status': 'error', 'message': 'Kierunek nie istnieje'}, status=404)
+
+        data = json.loads(request.body)
+
+        nowy_wydzial = kierunek.idw
+        if 'idw' in data:
+            nowy_wydzial = Wydzialy.objects.filter(idw=data['idw']).first()
+            if not nowy_wydzial:
+                return JsonResponse({'status': 'error', 'message': 'Podany wydział nie istnieje'}, status=404)
+            kierunek.idw = nowy_wydzial
+
+        nowa_nazwa = data.get('nazwak', kierunek.nazwak)
+        if (nowa_nazwa != kierunek.nazwak or nowy_wydzial.idw != kierunek.idw.idw) and Kierunki.objects.filter(nazwak=nowa_nazwa, idw=nowy_wydzial).exists():
+            return JsonResponse({'status': 'error', 'message': 'Kierunek o tej nazwie już istnieje na tym wydziale'}, status=409)
+
+        kierunek.nazwak = nowa_nazwa
+        kierunek.rokstartu = data.get('rokstartu', kierunek.rokstartu)
+        kierunek.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Kierunek zaktualizowany'})
+
+    # USUWANIE KIERUNKU (DELETE)
+    elif request.method == 'DELETE':
+        if not kierunek_id:
+            return JsonResponse({'status': 'error', 'message': 'Musisz podać ID kierunku do usunięcia'}, status=400)
+
+        kierunek = Kierunki.objects.filter(idk=kierunek_id).first()
+        if not kierunek:
+            return JsonResponse({'status': 'error', 'message': 'Kierunek nie istnieje'}, status=404)
+
+        kierunek.delete()
+        return JsonResponse({'status': 'success', 'message': 'Kierunek usunięty'})
+
+    return JsonResponse({'status': 'error', 'message': 'Metoda niedozwolona'}, status=405)
 
 @csrf_exempt
 def api_CRUD_subject(request, przedmiot_id=None):
