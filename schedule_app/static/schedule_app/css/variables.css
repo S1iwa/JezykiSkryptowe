@@ -1,0 +1,29 @@
+:root {
+    --color-main:    #2563eb;
+    --color-error:   #dc2626;
+    --color-success: #16a34a;
+
+    --bg-page:  #f5f5f5;
+    --bg-card:  #ffffff;
+    --bg-input: #ffffff;
+
+    --text-primary:   #111111;
+    --text-secondary: #6b6b6b;
+
+    --gray-light:  #e8e8e8;
+    --gray-medium: #c0c0c0;
+    --gray-dark:   #6b6b6b;
+}
+
+body.dark {
+    --bg-page:  #1a1a1a;
+    --bg-card:  #242424;
+    --bg-input: #2a2a2a;
+
+    --text-primary:   #e8e8e8;
+    --text-secondary: #8a8a8a;
+
+    --gray-light:  #3a3a3a;
+    --gray-medium: #4a4a4a;
+    --gray-dark:   #8a8a8a;
+}

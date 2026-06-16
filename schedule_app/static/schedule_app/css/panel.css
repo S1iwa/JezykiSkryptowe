@@ -1,0 +1,172 @@
+/* === Układ sidebar (student i wykładowca) === */
+
+.panel-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.panel-sidebar {
+    width: 20%;
+    min-width: 190px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-right: 1px solid var(--gray-light);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 18px 24px;
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar-tytul {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin: 0;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.sidebar-info {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.sidebar-info-wiersz {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-info-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-secondary);
+}
+
+.sidebar-info-wartosc {
+    font-size: 13px;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.sidebar-divider {
+    border: none;
+    border-top: 1px solid var(--gray-light);
+    margin: 18px 0;
+}
+
+.sidebar-akcje {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sidebar-btn {
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    border: 1px solid var(--gray-medium);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    text-align: left;
+    transition: background 0.15s, border-color 0.15s;
+    box-sizing: border-box;
+}
+
+.sidebar-btn:hover {
+    background: var(--gray-light);
+    border-color: var(--gray-dark);
+}
+
+.sidebar-btn.danger {
+    color: var(--color-error);
+    border-color: var(--color-error);
+}
+
+.sidebar-btn.danger:hover {
+    background: var(--gray-light);
+}
+
+.panel-content {
+    flex: 1;
+    padding: 36px 40px;
+    box-sizing: border-box;
+    overflow-x: auto;
+}
+
+.panel-content h3 {
+    margin-top: 0;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.content-sekcja {
+    background: var(--bg-card);
+    border: 1px solid var(--gray-light);
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 420px;
+    margin-bottom: 24px;
+}
+
+/* Stare style panelowe z kontenerem - zostawiamy dla ewentualnych innych widoków */
+.panel-kontener {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.panel-naglowek {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--gray-light);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.akcje-panelu {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.ukryta-sekcja {
+    background: var(--bg-card);
+    border: 1px solid var(--gray-light);
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 700px) {
+    .panel-layout {
+        flex-direction: column;
+    }
+    .panel-sidebar {
+        width: 100%;
+        min-width: unset;
+        height: auto;
+        position: static;
+        padding: 16px;
+        border-right: none;
+        border-bottom: 1px solid var(--gray-light);
+    }
+    .sidebar-info { flex-direction: row; flex-wrap: wrap; }
+    .sidebar-akcje { flex-direction: row; flex-wrap: wrap; }
+    .sidebar-btn { width: auto; }
+    .panel-content { padding: 20px; }
+}
