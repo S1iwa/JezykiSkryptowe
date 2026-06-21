@@ -18,6 +18,9 @@ def api_CRUD_budynki(request, budynek_id=None):
         if brakujace:
             return JsonResponse({'status': 'error', 'message': f'Brakujące pola: {", ".join(brakujace)}'}, status=400)
 
+        if Budynki.objects.filter(nazwab=data.get('nazwab')).exists():
+            return JsonResponse({'status': 'error', 'message': 'Budynek o podanej nazwie już istnieje'}, status=409)
+
         nowy_budynek = Budynki.objects.create(
             nazwab=data.get('nazwab'),
             adresb=data.get('adresb')
@@ -39,7 +42,11 @@ def api_CRUD_budynki(request, budynek_id=None):
 
         data = json.loads(request.body)
 
-        budynek.nazwab = data.get('nazwab', budynek.nazwab)
+        nowa_nazwa = data.get('nazwab', budynek.nazwab)
+        if nowa_nazwa != budynek.nazwab and Budynki.objects.filter(nazwab=nowa_nazwa).exists():
+            return JsonResponse({'status': 'error', 'message': 'Budynek o podanej nazwie już istnieje'}, status=409)
+
+        budynek.nazwab = nowa_nazwa
         budynek.adresb = data.get('adresb', budynek.adresb)
         budynek.save()
 
@@ -154,6 +161,9 @@ def api_CRUD_subject(request, przedmiot_id=None):
         if brakujace:
             return JsonResponse({'status': 'error', 'message': f'Brakujące pola: {", ".join(brakujace)}'}, status=400)
 
+        if Przedmioty.objects.filter(nazwap=data.get('nazwap'), formap=data.get('formap')).exists():
+            return JsonResponse({'status': 'error', 'message': 'Przedmiot o tej nazwie i formie już istnieje'}, status=409)
+
         nowy_przedmiot = Przedmioty.objects.create(
             nazwap=data.get('nazwap'),
             formap=data.get('formap'),
@@ -177,8 +187,14 @@ def api_CRUD_subject(request, przedmiot_id=None):
         data = json.loads(request.body)
 
         # Zmieniamy dane. Jeśli jakiegoś pola nie wysłano w JSON, zostawiamy stare (drugi parametr get)
-        przedmiot.nazwap = data.get('nazwap', przedmiot.nazwap)
-        przedmiot.formap = data.get('formap', przedmiot.formap)
+        nowa_nazwa = data.get('nazwap', przedmiot.nazwap)
+        nowa_forma = data.get('formap', przedmiot.formap)
+
+        if (nowa_nazwa != przedmiot.nazwap or nowa_forma != przedmiot.formap) and Przedmioty.objects.filter(nazwap=nowa_nazwa, formap=nowa_forma).exists():
+            return JsonResponse({'status': 'error', 'message': 'Przedmiot o tej nazwie i formie już istnieje'}, status=409)
+
+        przedmiot.nazwap = nowa_nazwa
+        przedmiot.formap = nowa_forma
         przedmiot.lbgodz = data.get('lbgodz', przedmiot.lbgodz)
         przedmiot.save()
 
