@@ -1,4 +1,3 @@
-// Funkcja pokazLogowanie - Strona logowania
 function pokazLogowanie(app) {
     app.innerHTML = `
         <button id="przycisk-motywu-login" class="przycisk-motywu">
@@ -22,13 +21,11 @@ function pokazLogowanie(app) {
         </div>
     `;
 
-    // Obsługa przycisku motywu tylko dla strony logowania
     document.getElementById('przycisk-motywu-login').onclick = function() {
         toggleMotyw();
         this.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
     };
 
-    // Logika przycisku Zaloguj:
     document.getElementById('przycisk-login').onclick = function() {
         var email = document.getElementById('pole-email').value;
         var haslo = document.getElementById('pole-haslo').value;
@@ -36,19 +33,13 @@ function pokazLogowanie(app) {
 
         komunikatBledu.classList.add('hidden');
 
-        fetch('/api/auth/login/', {
+        apiCall('/api/auth/login/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': window.CSRF_TOKEN
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ email: email, password: haslo })
         })
-
-        .then(function(odpowiedz) {
-            return odpowiedz.json();
-        })
-
         .then(function(dane) {
             if (dane.status === 'success') {
                 sessionStorage.setItem('email', dane.user_info.email);
@@ -68,9 +59,8 @@ function pokazLogowanie(app) {
                 komunikatBledu.classList.remove('hidden');
             }
         })
-
-        .catch(function() {
-            komunikatBledu.textContent = 'Błąd połączenia z serwerem.';
+        .catch(function(err) {
+            komunikatBledu.textContent = err.message || 'Wystąpił nieznany błąd.';
             komunikatBledu.classList.remove('hidden');
         });
     }

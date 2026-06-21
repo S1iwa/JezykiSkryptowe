@@ -25,7 +25,7 @@ function pokazPanelWykladowcy(app) {
         `;
     }).join('');
     if (liczbaZajec === 0) {
-        wierszeTabeli = '<tr><td colspan="5" style="text-align: center;">Brak zaplanowanych zajęć</td></tr>';
+        wierszeTabeli = '<tr><td colspan="5" class="tekst-wysrodkowany">Brak zaplanowanych zajęć</td></tr>';
     }
 
     app.innerHTML = `
@@ -36,7 +36,7 @@ function pokazPanelWykladowcy(app) {
                 <div class="sidebar-info">
                     <div class="sidebar-info-wiersz">
                         <span class="sidebar-info-label">Zalogowano jako</span>
-                        <span class="sidebar-info-wartosc" style="font-weight: 600;">${pelneImie}</span>
+                        <span class="sidebar-info-wartosc tekst-pogrubiony">${pelneImie}</span>
                     </div>
                     <div class="sidebar-info-wiersz">
                         <span class="sidebar-info-label">E-mail</span>
@@ -49,7 +49,7 @@ function pokazPanelWykladowcy(app) {
                     </div>
                     ` : ''}
                     
-                    <div class="sidebar-divider" style="margin: 12px 0;"></div>
+                    <div class="sidebar-divider" ></div>
                     
                     <div class="sidebar-info-wiersz">
                         <span class="sidebar-info-label">Zaplanowane zajęcia</span>
@@ -64,7 +64,7 @@ function pokazPanelWykladowcy(app) {
                     <button id="nav-sale" class="sidebar-btn"><span class="material-symbols-outlined">meeting_room</span> Wyszukaj wolną salę</button>
                     <button id="nav-prowadzacy" class="sidebar-btn"><span class="material-symbols-outlined">groups</span> Lista prowadzących</button>
                     
-                    <div class="sidebar-divider" style="margin: 12px 0;"></div>
+                    <div class="sidebar-divider" ></div>
 
                     <button id="przycisk-motyw-wykladowca" class="sidebar-btn motyw">${document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span> Jasny motyw' : '<span class="material-symbols-outlined">dark_mode</span> Ciemny motyw'}</button>
                     <button id="przycisk-eksport-csv-wykladowca" class="sidebar-btn"><span class="material-symbols-outlined">download</span> Pobierz plan (CSV)</button>
@@ -94,10 +94,14 @@ function pokazPanelWykladowcy(app) {
 
                 <!-- WIDOK 2: WYSZUKIWARKA SAL -->
                 <div id="widok-sale" class="hidden">
-                    <h3>Wyszukaj wolną salę</h3>
-                    <div class="content-sekcja" style="max-width: 100%;">
-                        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-                            <div class="pole" style="margin-bottom: 0; flex: 1; min-width: 150px;">
+                    <div id="sekcja-szukaj" class="hidden">
+                    <div class="content-sekcja sekcja-pelna">
+                        <div class="wyszukiwarka-pozioma">
+                            <div class="pole pole-wyszukiwania flex-1">
+                                <label>Sala / Budynek</label>
+                                <input type="text" id="szukaj-sala" placeholder="Np. A1, 101">
+                            </div>
+                            <div class="pole pole-wyszukiwania flex-1">
                                 <label>Dzień tygodnia</label>
                                 <select id="szukaj-sale-dzien">
                                     <option value="Poniedziałek">Poniedziałek</option>
@@ -109,19 +113,20 @@ function pokazPanelWykladowcy(app) {
                                     <option value="Niedziela">Niedziela</option>
                                 </select>
                             </div>
-                            <div class="pole" style="margin-bottom: 0; flex: 1; min-width: 120px;">
-                                <label>Od godziny</label>
-                                <input type="time" id="szukaj-sale-od" value="08:00">
+                            <div class="pole pole-wyszukiwania flex-1">
+                                <label>Prowadzący</label>
+                                <input type="text" id="szukaj-prowadzacy" placeholder="Imię lub Nazwisko">
                             </div>
-                            <div class="pole" style="margin-bottom: 0; flex: 1; min-width: 120px;">
-                                <label>Do godziny</label>
-                                <input type="time" id="szukaj-sale-do" value="10:00">
+                            <div class="pole pole-wyszukiwania flex-1">
+                                <label>Przedmiot</label>
+                                <input type="text" id="szukaj-przedmiot" placeholder="Nazwa przedmiotu">
                             </div>
-                            <div style="display: flex; align-items: flex-end;">
-                                <button id="przycisk-szukaj-sal" class="przycisk-akcja przycisk-wyszukiwarka">Szukaj</button>
+                            <div class="flex-dol">
+                                <button id="btn-szukaj-zajecia" class="przycisk-akcja">Szukaj wolnych / zajęć</button>
                             </div>
                         </div>
                         <div id="komunikat-sale" class="blad hidden"></div>
+                    </div>
                     </div>
                     
                     <table class="tabela-planu hidden" id="tabela-wynikow-sal">
@@ -140,8 +145,8 @@ function pokazPanelWykladowcy(app) {
                 <!-- WIDOK 3: LISTA PROWADZĄCYCH -->
                 <div id="widok-prowadzacy" class="hidden">
                     <h3>Lista prowadzących</h3>
-                    <div id="komunikat-szukaj-prowadzacego" class="blad hidden"></div>
-                    <table class="tabela-planu hidden" id="tabela-wynikow-prowadzacy" style="margin-top: 20px;">
+                    <div id="komunikat-szukaj" class="blad hidden"></div>
+                    <table class="tabela-planu hidden odstep-gorny" id="tabela-wynikow-prowadzacy">
                         <thead>
                             <tr>
                                 <th>Stopień</th>
@@ -154,8 +159,8 @@ function pokazPanelWykladowcy(app) {
                 </div>
 
                 <!-- ZMIANA HASŁA -->
-                <div id="sekcja-haslo-wykladowca" class="content-sekcja hidden" style="margin-top: 30px;">
-                    <h3 style="margin-top:0; font-size: 16px;">Zmiana hasła</h3>
+                <div id="sekcja-haslo-wykladowca" class="content-sekcja hidden odstep-gorny">
+                    <h3 class="naglowek-maly">Zmiana hasła</h3>
                     <div id="komunikat-haslo-wykladowca" class="blad hidden"></div>
                     <div class="pole">
                         <input type="password" id="stare-haslo-wykladowca" placeholder="Stare hasło">
@@ -175,9 +180,8 @@ function pokazPanelWykladowcy(app) {
         this.innerHTML = document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span> Jasny motyw' : '<span class="material-symbols-outlined">dark_mode</span> Ciemny motyw';
     };
 
-    // Wylogowywanie:
     document.getElementById('przycisk-wyloguj-wykladowca').onclick = function() {
-        fetch('/api/auth/logout/', { method: 'POST', headers: { 'X-CSRFToken': window.CSRF_TOKEN } })
+        apiCall('/api/auth/logout/', { method: 'POST' })
         .then(function() {
             sessionStorage.clear();
             history.pushState({}, '', '/logowanie/');
@@ -185,12 +189,10 @@ function pokazPanelWykladowcy(app) {
         });
     };
 
-    // Przełączanie zmiany hasła:
     document.getElementById('przycisk-pokaz-haslo-wykladowca').onclick = function() {
         document.getElementById('sekcja-haslo-wykladowca').classList.toggle('hidden');
     };
 
-    // Logika eksportu CSV:
     document.getElementById('przycisk-eksport-csv-wykladowca').onclick = function() {
         if (planZajec.length === 0) {
             alert('Brak zajęć do eksportu.');
@@ -217,21 +219,18 @@ function pokazPanelWykladowcy(app) {
         link.click();
     };
 
-    // Logika zmiany hasła:
     document.getElementById('przycisk-zmien-haslo-wykladowca').onclick = function() {
         var stareHaslo = document.getElementById('stare-haslo-wykladowca').value;
         var noweHaslo = document.getElementById('nowe-haslo-wykladowca').value;
         var komunikat = document.getElementById('komunikat-haslo-wykladowca');
 
-        fetch('/api/auth/change_password/', {
+        apiCall('/api/auth/change_password/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': window.CSRF_TOKEN
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ old_password: stareHaslo, new_password: noweHaslo })
         })
-        .then(res => res.json())
         .then(dane => {
             komunikat.classList.remove('hidden');
             if (dane.status === 'success') {
@@ -246,7 +245,6 @@ function pokazPanelWykladowcy(app) {
         });
     };
 
-    // ===== WYSZUKIWARKA SAL =====
     document.getElementById('przycisk-szukaj-sal').onclick = function() {
         var dzien = document.getElementById('szukaj-sale-dzien').value;
         var odGodz = document.getElementById('szukaj-sale-od').value;
@@ -265,8 +263,7 @@ function pokazPanelWykladowcy(app) {
             return;
         }
 
-        fetch('/api/schedule/find-audience/')
-        .then(res => res.json())
+        apiCall('/api/schedule/find-audience/')
         .then(dane => {
             if (dane.status === 'success') {
                 var sale = dane.sale;
@@ -295,12 +292,12 @@ function pokazPanelWykladowcy(app) {
                 });
 
                 tabela.classList.remove('hidden');
-                if (wolneSale.length === 0) {
-                    wyniki.innerHTML = '<tr><td colspan="4" style="text-align:center;">Brak wolnych sal w podanym przedziale czasowym.</td></tr>';
+                if (dane.wolne_sale.length === 0) {
+                    wyniki.innerHTML = '<tr><td colspan="4" class="tekst-wysrodkowany">Brak wolnych sal w podanym przedziale czasowym.</td></tr>';
                 } else {
-                    wyniki.innerHTML = wolneSale.map(s => `
+                    wyniki.innerHTML = dane.wolne_sale.map(s => `
                         <tr>
-                            <td>${s.budynek.nazwab} <br><small style="color: var(--text-secondary);">${s.budynek.adresb}</small></td>
+                            <td>${s.budynek.nazwab} <br><small class="tekst-szary">${s.budynek.adresb}</small></td>
                             <td><strong>${s.numers}</strong></td>
                             <td>${s.typs}</td>
                             <td>${s.pojemnosc} os.</td>
@@ -314,9 +311,8 @@ function pokazPanelWykladowcy(app) {
         });
     };
 
-    // ===== WYSZUKIWARKA INNYCH PROWADZĄCYCH =====
     function zaladujProwadzacych() {
-        var komunikat = document.getElementById('komunikat-szukaj-prowadzacego');
+        var komunikat = document.getElementById('komunikat-szukaj');
         var wynikiLista = document.getElementById('wyniki-wyszukiwania');
         var tabelaProwadzacy = document.getElementById('tabela-wynikow-prowadzacy');
 
@@ -324,17 +320,16 @@ function pokazPanelWykladowcy(app) {
         wynikiLista.innerHTML = '';
         tabelaProwadzacy.classList.add('hidden');
 
-        fetch(`/api/students/professors-information/?imie=&nazwisko=`)
-        .then(res => res.json())
+        apiCall(`/api/students/professors-information/?imie=&nazwisko=`)
         .then(dane => {
             if (dane.status === 'success') {
                 tabelaProwadzacy.classList.remove('hidden');
                 if (dane.prowadzacy.length === 0) {
-                    wynikiLista.innerHTML = '<tr><td colspan="3" style="text-align:center;">Brak prowadzących w bazie.</td></tr>';
+                    wynikiLista.innerHTML = '<tr><td colspan="3" class="tekst-wysrodkowany">Brak prowadzących w bazie.</td></tr>';
                 } else {
-                    wynikiLista.innerHTML = dane.prowadzacy.map(p => {
-                        var przedmiotyStr = p.przedmioty.map(pr => pr.nazwap + ' <span style="color:var(--text-secondary);">(' + pr.formap + ')</span>').join('<br>');
-                        return `
+                    dane.prowadzacy.forEach(p => {
+                        var przedmiotyStr = p.przedmioty.map(pr => pr.nazwap + ' <span class="tekst-szary">(' + pr.formap + ')</span>').join('<br>');
+                        wynikiLista.innerHTML += `
                             <tr>
                                 <td>${p.stopien || '-'}</td>
                                 <td><strong>${p.imie} ${p.nazwisko}</strong></td>

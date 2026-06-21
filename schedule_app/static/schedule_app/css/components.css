@@ -135,3 +135,55 @@ button {
 .tabela-planu tr:hover td {
     background-color: var(--gray-light);
 }
+
+/* Nowe klasy dla formularzy, komunikatów i przycisków */
+.przycisk-sukces {
+    background: var(--color-success, #28a745) !important;
+    color: #fff !important;
+}
+
+.przycisk-blad {
+    background: var(--color-error, #dc3545) !important;
+    color: #fff !important;
+}
+
+.komunikat-formularza {
+    margin-top: 16px;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.strefa-importu {
+    flex: 1;
+    border: 1px dashed var(--gray-medium);
+    padding: 8px;
+    text-align: center;
+    border-radius: 6px;
+}
+
+.input-plik {
+    font-size: 13px;
+    width: 100%;
+    color: var(--text-primary);
+}
+
+.tekst-wysrodkowany {
+    text-align: center;
+}
+
+.tekst-pogrubiony {
+    font-weight: 600;
+}
+
+.tekst-sukces {
+    color: var(--color-success, green);
+}
+
+.tekst-blad {
+    color: var(--color-error, red);
+}
+
+.tekst-szary {
+    color: var(--text-secondary);
+}
+

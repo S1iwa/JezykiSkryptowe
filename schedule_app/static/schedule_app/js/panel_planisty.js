@@ -13,7 +13,7 @@ function pokazPanelPlanisty(app) {
                 <div class="sidebar-info">
                     <div class="sidebar-info-wiersz">
                         <span class="sidebar-info-label">Zalogowano jako</span>
-                        <span class="sidebar-info-wartosc" style="font-weight: 600;">${pelneImie}</span>
+                        <span class="sidebar-info-wartosc tekst-pogrubiony">${pelneImie}</span>
                     </div>
                     <div class="sidebar-info-wiersz">
                         <span class="sidebar-info-label">E-mail</span>
@@ -32,13 +32,13 @@ function pokazPanelPlanisty(app) {
 
             <main class="panel-content">
                 <div id="sekcja-crud">
-                    <h2 style="margin-bottom: 20px; font-size: 22px;">Zarządzanie strukturą uczelni (CRUD)</h2>
-                    <div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
+                    <h2 class="naglowek-sekcji">Zarządzanie strukturą uczelni (CRUD)</h2>
+                    <div class="uklad-kolumnowy">
                         <!-- Lewa Kolumna -->
-                        <div style="flex: 1; min-width: 300px; max-width: 400px;">
+                        <div class="kolumna-lewa">
                             <div class="pole">
                                 <label><strong>Wybierz obszar zarządzania:</strong></label>
-                                <select id="wybierz-zasob-crud" style="padding: 10px 12px; width: 100%; margin-top: 5px; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--gray-medium); border-radius: 6px; font-family: 'Inter', sans-serif;">
+                                <select id="wybierz-zasob-crud" class="input-plik">
                                     <option value="subject">Przedmioty</option>
                                     <option value="sala">Sale wykładowe</option>
                                     <option value="pracownik">Pracownicy / Wykładowcy</option>
@@ -47,33 +47,33 @@ function pokazPanelPlanisty(app) {
                                 </select>
                             </div>
 
-                            <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--gray-light);">
+                            <hr class="sidebar-divider">
 
                             <div id="kontener-formularza-crud">
                             </div>
 
-                            <div id="komunikat-crud" style="margin-top: 16px; font-weight: bold; font-size: 13px;"></div>
+                            <div id="komunikat-crud" class="komunikat-formularza"></div>
                             
-                            <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--gray-light);">
+                            <hr class="sidebar-divider">
                             
-                            <h3 style="font-size: 16px; margin-bottom: 12px;">Import / Eksport dla wybranego zasobu</h3>
-                            <div style="display: flex; gap: 10px;">
-                                <button id="btn-eksport-model" class="przycisk-akcja" style="flex: 1;">Eksportuj (CSV)</button>
-                                <div style="flex: 1; border: 1px dashed var(--gray-medium); padding: 8px; text-align: center; border-radius: 6px;">
-                                    <input type="file" id="plik-import-csv" accept=".csv" style="font-size: 13px; width: 100%; color: var(--text-primary);">
-                                    <button id="btn-import-model" class="przycisk-maly" style="margin-top: 8px; width: 100%; background: var(--color-main);">Importuj plik (CSV)</button>
+                            <h3 class="naglowek-maly">Import / Eksport dla wybranego zasobu</h3>
+                            <div class="flex-wiersz">
+                                <button id="btn-eksport-model" class="przycisk-akcja flex-1">Eksportuj (CSV)</button>
+                                <div class="strefa-importu">
+                                    <input type="file" id="plik-import-csv" accept=".csv" class="input-plik">
+                                    <button id="btn-import-model" class="przycisk-maly przycisk-akcja odstep-maly">Importuj plik (CSV)</button>
                                 </div>
                             </div>
-                            <div id="komunikat-csv" style="margin-top: 12px; font-weight: bold; font-size: 13px;"></div>
+                            <div id="komunikat-csv" class="komunikat-formularza"></div>
                         </div>
 
                         <!-- Pionowa kreska rozdzielająca -->
-                        <div style="width: 1px; background-color: var(--gray-light); align-self: stretch; min-height: 400px;"></div>
+                        <div class="separator-pionowy"></div>
 
                         <!-- Prawa Kolumna -->
-                        <div style="flex: 2; min-width: 400px; overflow-x: auto;">
+                        <div class="kolumna-prawa">
                             <div id="podglad-danych-kontener" class="hidden">
-                                <h3 id="naglowek-podgladu" style="margin-bottom: 12px;">Aktualna lista</h3>
+                                <h3 id="naglowek-podgladu" class="odstep-maly">Aktualna lista</h3>
                                 <table class="tabela-planu" id="tabela-wszystkie-rekordy">
                                     <thead>
                                         <tr id="naglowki-tabeli-crud">
@@ -88,9 +88,9 @@ function pokazPanelPlanisty(app) {
                 </div>
 
                 <!-- ZMIANA HASŁA -->
-                <div id="sekcja-haslo-planista" class="content-sekcja hidden" style="margin-top: 30px;">
-                    <h3 style="margin-top:0; font-size: 16px;">Zmiana hasła</h3>
-                    <div id="komunikat-haslo" class="blad hidden" style="margin-bottom: 16px;"></div>
+                <div id="sekcja-haslo-planista" class="content-sekcja hidden odstep-gorny">
+                    <h3 class="naglowek-maly">Zmiana hasła</h3>
+                    <div id="komunikat-haslo" class="blad hidden odstep-sredni"></div>
                     <div class="pole">
                         <input type="password" id="stare-haslo" placeholder="Stare hasło">
                     </div>
@@ -109,9 +109,9 @@ function pokazPanelPlanisty(app) {
         this.innerHTML = document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span> Jasny motyw' : '<span class="material-symbols-outlined">dark_mode</span> Ciemny motyw';
     };
 
-    // Wylogowywanie
+    // Wylogowanie
     document.getElementById('przycisk-wyloguj-planista').onclick = function() {
-        fetch('/api/auth/logout/', { method: 'POST', headers: { 'X-CSRFToken': window.CSRF_TOKEN }, credentials: 'same-origin' })
+        apiCall('/api/auth/logout/', { method: 'POST' })
         .then(function() {
             sessionStorage.clear();
             history.pushState({}, '', '/logowanie/');
@@ -127,29 +127,23 @@ function pokazPanelPlanisty(app) {
     };
 
     document.getElementById('przycisk-zmien-haslo').onclick = function() {
-        var stare = document.getElementById('stare-haslo').value;
-        var nowe = document.getElementById('nowe-haslo').value;
+        var stareHaslo = document.getElementById('stare-haslo').value;
+        var noweHaslo = document.getElementById('nowe-haslo').value;
         var komunikat = document.getElementById('komunikat-haslo');
         
         komunikat.classList.add('hidden');
         
-        if (!stare || !nowe) {
+        if (!stareHaslo || !noweHaslo) {
             komunikat.textContent = 'Wypełnij oba pola.';
             komunikat.classList.remove('hidden');
             komunikat.style.color = 'var(--color-error)';
             return;
         }
 
-        fetch('/api/auth/change_password/', {
+        apiCall('/api/auth/change_password/', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': window.CSRF_TOKEN
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({ old_password: stare, new_password: nowe })
+            body: JSON.stringify({ old_password: stareHaslo, new_password: noweHaslo })
         })
-        .then(res => res.json())
         .then(dane => {
             komunikat.classList.remove('hidden');
             if (dane.status === 'success') {
@@ -158,14 +152,9 @@ function pokazPanelPlanisty(app) {
                 document.getElementById('stare-haslo').value = '';
                 document.getElementById('nowe-haslo').value = '';
             } else {
+                komunikat.classList.add('tekst-blad');
                 komunikat.textContent = dane.message || 'Wystąpił błąd.';
-                komunikat.style.color = 'var(--color-error)';
             }
-        })
-        .catch(err => {
-            komunikat.textContent = 'Błąd połączenia z serwerem.';
-            komunikat.classList.remove('hidden');
-            komunikat.style.color = 'var(--color-error)';
         });
     };
 
@@ -199,8 +188,8 @@ function pokazPanelPlanisty(app) {
         var tdAkcje = document.getElementById(`akcje-${id}`);
         if (tdAkcje) {
             tdAkcje.innerHTML = `
-                <button class="przycisk-maly" style="background: var(--color-success, #28a745); color: #fff;" onclick="zapiszEdycje(${id})">Zatwierdź</button>
-                <button class="przycisk-maly" style="background: var(--color-error, #dc3545); color: #fff;" onclick="anulujEdycje(${id})">Anuluj</button>
+                <button class="przycisk-maly przycisk-sukces" onclick="zapiszEdycje(${id})">Zatwierdź</button>
+                <button class="przycisk-maly przycisk-blad" onclick="anulujEdycje(${id})">Anuluj</button>
             `;
         }
     };
@@ -234,13 +223,11 @@ function pokazPanelPlanisty(app) {
         // Przywrócenie przycisków Edytuj / Usuń
         var tdAkcje = document.getElementById(`akcje-${id}`);
         if (tdAkcje) {
-            var editBtnStyle = "background: var(--gray-dark); color: #fff;";
-            var delBtnStyle = "background: var(--color-error); color: #fff;";
             var etykietaUsun = (zasob === 'zajecia') ? 'Odwołaj' : 'Usuń';
 
             tdAkcje.innerHTML = `
-                <button id="btn-edytuj-${id}" class="przycisk-maly" style="${editBtnStyle}" onclick="odblokujEdycje(${id})">Edytuj</button>
-                <button class="przycisk-maly" style="${delBtnStyle}" onclick="usunWiersz(${id})">${etykietaUsun}</button>
+                <button id="btn-edytuj-${id}" class="przycisk-maly przycisk-maly" onclick="odblokujEdycje(${id})">Edytuj</button>
+                <button class="przycisk-maly przycisk-maly przycisk-blad" onclick="usunWiersz(${id})">${etykietaUsun}</button>
             `;
         }
     };
@@ -331,15 +318,10 @@ function pokazPanelPlanisty(app) {
         komunikat.style.color = 'var(--color-main)';
         komunikat.textContent = 'Przetwarzanie pliku importu...';
 
-        fetch(`/api/data/import/${model}/`, {
+        apiCall(`/api/data/import/${model}/`, {
             method: 'POST',
-            headers: {
-                'X-CSRFToken': window.CSRF_TOKEN
-            },
-            credentials: 'same-origin',
             body: formData
         })
-        .then(res => res.json())
         .then(dane => {
             if (dane.status === 'success') {
                 komunikat.style.color = 'var(--color-success)';
@@ -347,13 +329,9 @@ function pokazPanelPlanisty(app) {
                 plikInput.value = '';
                 zaladujDaneDoTabeli();
             } else {
-                komunikat.style.color = 'var(--color-error)';
-                komunikat.textContent = dane.message + (dane.skipped ? ` Pominiętych wierszy: ${dane.skipped.length}` : '');
+                komunikat.classList.add('tekst-blad');
+                komunikat.textContent = dane.message || 'Błąd podczas importu.';
             }
-        })
-        .catch(() => {
-            komunikat.style.color = 'var(--color-error)';
-            komunikat.textContent = 'Błąd krytyczny podczas wysyłania pliku na serwer.';
         });
     };
 
@@ -372,11 +350,11 @@ function pokazPanelPlanisty(app) {
 
         if (zasob === 'subject') {
             kontenerForm.innerHTML = `
-                <h4 style="margin-top: 0;">Dodaj Nowy Przedmiot</h4>
+                <h4 class="naglowek-maly">Dodaj Nowy Przedmiot</h4>
                 <div class="pole"><input type="text" id="sub-nazwa" placeholder="Nazwa przedmiotu (np. Programowanie)"></div>
                 <div class="pole"><input type="text" id="sub-forma" placeholder="Forma (np. Wykład / Laboratorium)"></div>
                 <div class="pole"><input type="number" id="sub-godz" placeholder="Liczba godzin (np. 30)"></div>
-                <button id="btn-sub-add" class="przycisk-akcja" style="background: var(--color-success); margin-top:10px;">Dodaj obiekt</button>
+                <button id="btn-sub-add" class="przycisk-akcja przycisk-sukces odstep-maly">Dodaj obiekt</button>
             `;
             document.getElementById('btn-sub-add').onclick = function() {
                 wykonajZapytanieCrud('/api/CRUD/subject/', 'POST', {
@@ -388,15 +366,15 @@ function pokazPanelPlanisty(app) {
         }
         else if (zasob === 'sala') {
             kontenerForm.innerHTML = `
-                <h4 style="margin-top: 0;">Dodaj Nową Salę Wykładową</h4>
+                <h4 class="naglowek-maly">Dodaj Nową Salę Wykładową</h4>
                 <div class="pole"><input type="text" id="sala-numer" placeholder="Numer sali (np. 112A)"></div>
                 <div class="pole"><input type="text" id="sala-typ" placeholder="Typ sali (np. Laboratoryjna)"></div>
                 <div class="pole"><input type="number" id="sala-pojemnosc" placeholder="Pojemność sali (np. 30)"></div>
                 <div class="pole">
-                    <label style="font-size: 13px; color: var(--text-secondary);"><strong>Budynek:</strong></label>
-                    <select id="sala-idb" style="${selectStyle}"></select>
+                    <label class="tekst-szary"><strong>Budynek:</strong></label>
+                    <select id="sala-idb" class="input-plik"></select>
                 </div>
-                <button id="btn-sala-add" class="przycisk-akcja" style="background: var(--color-success); margin-top:10px;">Dodaj obiekt (POST)</button>
+                <button id="btn-sala-add" class="przycisk-akcja przycisk-sukces odstep-maly">Dodaj obiekt (POST)</button>
             `;
 
             // Dynamiczne pobranie budynków
@@ -413,7 +391,7 @@ function pokazPanelPlanisty(app) {
         }
         else if (zasob === 'pracownik') {
             kontenerForm.innerHTML = `
-                <h4 style="margin-top: 0;">Dodaj Nowego Pracownika</h4>
+                <h4 class="naglowek-maly">Dodaj Nowego Pracownika</h4>
                 <div class="pole"><input type="text" id="prac-stopien" placeholder="Stopień naukowy (np. dr inż.)"></div>
                 <div class="pole"><input type="text" id="prac-imie" placeholder="Imię"></div>
                 <div class="pole"><input type="text" id="prac-nazwisko" placeholder="Nazwisko"></div>
@@ -421,7 +399,7 @@ function pokazPanelPlanisty(app) {
                 <div class="pole"><input type="text" id="prac-nrtel" placeholder="Numer telefonu"></div>
                 <div class="pole"><input type="password" id="prac-haslo" placeholder="Hasło konta"></div>
                 <div class="pole"><input type="text" id="prac-rola" placeholder="Rola w systemie (wykladowca / planista)"></div>
-                <button id="btn-prac-add" class="przycisk-akcja" style="background: var(--color-success); margin-top:10px;">Dodaj obiekt (POST)</button>
+                <button id="btn-prac-add" class="przycisk-akcja przycisk-sukces odstep-maly">Dodaj obiekt (POST)</button>
             `;
             document.getElementById('btn-prac-add').onclick = function() {
                 wykonajZapytanieCrud('/api/CRUD/pracownik/', 'POST', {
@@ -437,17 +415,17 @@ function pokazPanelPlanisty(app) {
         }
         else if (zasob === 'grupa') {
             kontenerForm.innerHTML = `
-                <h4 style="margin-top: 0;">Dodaj Nową Grupę</h4>
+                <h4 class="naglowek-maly">Dodaj Nową Grupę</h4>
                 <div class="pole">
-                    <label style="font-size: 13px; color: var(--text-secondary);"><strong>Kierunek studiów:</strong></label>
-                    <select id="grup-idk" style="${selectStyle}"></select>
+                    <label class="tekst-szary"><strong>Kierunek studiów:</strong></label>
+                    <select id="grup-idk" class="input-plik"></select>
                 </div>
                 <div class="pole"><input type="number" id="grup-rokstudiow" placeholder="Rok studiów (np. 1)"></div>
                 <div class="pole"><input type="number" id="grup-semestr" placeholder="Semestr (np. 2)"></div>
                 <div class="pole"><input type="text" id="grup-rokakadem" placeholder="Rok akademicki (np. 2025/2026)"></div>
                 <div class="pole"><input type="number" id="grup-liczbaos" placeholder="Liczba studentów (np. 24)"></div>
                 <div class="pole"><input type="text" id="grup-opis" placeholder="Krótki opis grupy"></div>
-                <button id="btn-grup-add" class="przycisk-akcja" style="background: var(--color-success); margin-top:10px;">Dodaj obiekt (POST)</button>
+                <button id="btn-grup-add" class="przycisk-akcja przycisk-sukces odstep-maly">Dodaj obiekt (POST)</button>
             `;
 
             // Dynamiczne pobranie kierunków
@@ -466,30 +444,30 @@ function pokazPanelPlanisty(app) {
         }
         else if (zasob === 'zajecia') {
             kontenerForm.innerHTML = `
-                <h4 style="margin-top: 0;">Zaplanuj Nowe Zajęcia</h4>
+                <h4 class="naglowek-maly">Zaplanuj Nowe Zajęcia</h4>
                 <div class="pole"><input type="text" id="zaj-dzien" placeholder="Dzień tygodnia (np. Poniedziałek)"></div>
                 <div class="pole"><input type="text" id="zaj-godzrozp" placeholder="Godzina startu (Format HH:MM, np. 08:15)"></div>
                 <div class="pole"><input type="text" id="zaj-godzzak" placeholder="Godzina końca (Format HH:MM, np. 09:45)"></div>
                 <div class="pole"><input type="text" id="zaj-uwagi" placeholder="Uwagi (opcjonalne)"></div>
 
                 <div class="pole">
-                    <label style="font-size: 13px; color: var(--text-secondary);"><strong>Sala wykładowa:</strong></label>
-                    <select id="zaj-ids" style="${selectStyle}"></select>
+                    <label class="tekst-szary"><strong>Sala wykładowa:</strong></label>
+                    <select id="zaj-ids" class="input-plik"></select>
                 </div>
                 <div class="pole">
-                    <label style="font-size: 13px; color: var(--text-secondary);"><strong>Przedmiot:</strong></label>
-                    <select id="zaj-idp" style="${selectStyle}"></select>
+                    <label class="tekst-szary"><strong>Przedmiot:</strong></label>
+                    <select id="zaj-idp" class="input-plik"></select>
                 </div>
                 <div class="pole">
-                    <label style="font-size: 13px; color: var(--text-secondary);"><strong>Wykładowca / Prowadzący:</strong></label>
-                    <select id="zaj-idpr" style="${selectStyle}"></select>
+                    <label class="tekst-szary"><strong>Wykładowca / Prowadzący:</strong></label>
+                    <select id="zaj-idpr" class="input-plik"></select>
                 </div>
                 <div class="pole">
-                    <label style="font-size: 13px; color: var(--text-secondary);"><strong>Grupa studencka:</strong></label>
-                    <select id="zaj-idg" style="${selectStyle}"></select>
+                    <label class="tekst-szary"><strong>Grupa studencka:</strong></label>
+                    <select id="zaj-idg" class="input-plik"></select>
                 </div>
 
-                <button id="btn-zaj-add" class="przycisk-akcja" style="background: var(--color-success); margin-top:10px;">Zaplanuj zajęcia (POST)</button>
+                <button id="btn-zaj-add" class="przycisk-akcja przycisk-sukces odstep-maly">Zaplanuj zajęcia (POST)</button>
             `;
 
             // Pobieranie danych z endpointów
@@ -519,33 +497,22 @@ function pokazPanelPlanisty(app) {
         komunikat.style.color = 'var(--text-primary)';
         komunikat.textContent = 'Trwa komunikacja z serwerem API...';
 
-        var opcjeFetch = {
-            method: metoda,
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': window.CSRF_TOKEN
-            },
-            credentials: 'same-origin'
-        };
+        var options = { method: metoda };
         if (metoda !== 'DELETE') {
-            opcjeFetch.body = JSON.stringify(bodyObiekt);
+            options.body = JSON.stringify(bodyObiekt);
+            options.headers = { 'Content-Type': 'application/json' };
         }
 
-        fetch(url, opcjeFetch)
-        .then(res => res.json())
+        apiCall(url, options)
         .then(dane => {
             if (dane.status === 'success') {
                 komunikat.style.color = 'var(--color-success)';
                 komunikat.textContent = dane.message + (dane.id ? ` (ID: ${dane.id})` : '');
                 zaladujDaneDoTabeli();
             } else {
-                komunikat.style.color = 'var(--color-error)';
+                komunikat.classList.add('tekst-blad');
                 komunikat.textContent = 'Błąd: ' + (dane.message || 'Wystąpił nieznany błąd serwera.');
             }
-        })
-        .catch(() => {
-            komunikat.style.color = 'var(--color-error)';
-            komunikat.textContent = 'Błąd połączenia z backendem Django.';
         });
     }
 
@@ -555,15 +522,13 @@ function pokazPanelPlanisty(app) {
         var thr = document.getElementById('naglowki-tabeli-crud');
         var tbody = document.querySelector('#tabela-wszystkie-rekordy tbody');
 
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color: var(--text-primary);">Ładowanie danych z bazy...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="tekst-wysrodkowany">Ładowanie danych z bazy...</td></tr>';
 
-        fetch(`/api/get/${zasob}/`, { credentials: 'same-origin' })
-        .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, body: data })))
-        .then(resObj => {
-            let dane = resObj.body;
-            if (!resObj.ok || dane.status !== 'success') {
-                let errMsg = dane.message || `Błąd HTTP: ${resObj.status}`;
-                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color: var(--color-error);">Nie udało się pobrać danych: ${errMsg}</td></tr>`;
+        apiCall(`/api/get/${zasob}/`)
+        .then(dane => {
+            if (dane.status !== 'success') {
+                let errMsg = dane.message || 'Błąd HTTP';
+                tbody.innerHTML = `<tr><td colspan="10" class="tekst-wysrodkowany tekst-blad">Nie udało się pobrać danych: ${errMsg}</td></tr>`;
                 return;
             }
 
@@ -583,13 +548,13 @@ function pokazPanelPlanisty(app) {
                             <td id="row-sub-forma-${id}">${s.formap}</td>
                             <td id="row-sub-godz-${id}">${s.lbgodz}</td>
                             <td id="akcje-${id}">
-                                <button id="btn-edytuj-${id}" class="przycisk-maly" style="${editBtnStyle}" onclick="odblokujEdycje(${id})">Edytuj</button>
-                                <button class="przycisk-maly" style="${delBtnStyle}" onclick="usunWiersz(${id})">Usuń</button>
+                                <button id="btn-edytuj-${id}" class="przycisk-maly przycisk-maly" onclick="odblokujEdycje(${id})">Edytuj</button>
+                                <button class="przycisk-maly przycisk-maly przycisk-blad" onclick="usunWiersz(${id})">Usuń</button>
                             </td>
                         </tr>
                         `;
                     }).join('');
-                } else { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-secondary);">Brak rekordów.</td></tr>'; }
+                } else { tbody.innerHTML = '<tr><td colspan="5" class="tekst-wysrodkowany tekst-szary">Brak rekordów.</td></tr>'; }
             }
             else if (zasob === 'sala') {
                 naglowekText.textContent = "Aktualna lista sal wykładowych";
@@ -604,13 +569,13 @@ function pokazPanelPlanisty(app) {
                             <td id="row-sala-typ-${id}">${s.typs}</td>
                             <td id="row-sala-poj-${id}">${s.pojemnosc}</td>
                             <td id="akcje-${id}">
-                                <button id="btn-edytuj-${id}" class="przycisk-maly" style="${editBtnStyle}" onclick="odblokujEdycje(${id})">Edytuj</button>
-                                <button class="przycisk-maly" style="${delBtnStyle}" onclick="usunWiersz(${id})">Usuń</button>
+                                <button id="btn-edytuj-${id}" class="przycisk-maly przycisk-maly" onclick="odblokujEdycje(${id})">Edytuj</button>
+                                <button class="przycisk-maly przycisk-maly przycisk-blad" onclick="usunWiersz(${id})">Usuń</button>
                             </td>
                         </tr>
                         `;
                     }).join('');
-                } else { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-secondary);">Brak rekordów.</td></tr>'; }
+                } else { tbody.innerHTML = '<tr><td colspan="5" class="tekst-wysrodkowany tekst-szary">Brak rekordów.</td></tr>'; }
             }
             else if (zasob === 'pracownik') {
                 naglowekText.textContent = "Aktualna lista pracowników";
@@ -628,13 +593,13 @@ function pokazPanelPlanisty(app) {
                             <td id="row-prac-tel-${id}">${p.nrtel || ''}</td>
                             <td id="row-prac-rola-${id}">${p.rola || ''}</td>
                             <td id="akcje-${id}">
-                                <button id="btn-edytuj-${id}" class="przycisk-maly" style="${editBtnStyle}" onclick="odblokujEdycje(${id})">Edytuj</button>
-                                <button class="przycisk-maly" style="${delBtnStyle}" onclick="usunWiersz(${id})">Usuń</button>
+                                <button id="btn-edytuj-${id}" class="przycisk-maly przycisk-maly" onclick="odblokujEdycje(${id})">Edytuj</button>
+                                <button class="przycisk-maly przycisk-maly przycisk-blad" onclick="usunWiersz(${id})">Usuń</button>
                             </td>
                         </tr>
                         `;
                     }).join('');
-                } else { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color: var(--text-secondary);">Brak rekordów.</td></tr>'; }
+                } else { tbody.innerHTML = '<tr><td colspan="8" class="tekst-wysrodkowany tekst-szary">Brak rekordów.</td></tr>'; }
             }
             else if (zasob === 'grupa') {
                 naglowekText.textContent = "Aktualna lista grup studenckich";
@@ -651,13 +616,13 @@ function pokazPanelPlanisty(app) {
                             <td id="row-grup-osoby-${id}">${g.liczbaos}</td>
                             <td id="row-grup-opis-${id}">${g.opis || ''}</td>
                             <td id="akcje-${id}">
-                                <button id="btn-edytuj-${id}" class="przycisk-maly" style="${editBtnStyle}" onclick="odblokujEdycje(${id})">Edytuj</button>
-                                <button class="przycisk-maly" style="${delBtnStyle}" onclick="usunWiersz(${id})">Usuń</button>
+                                <button id="btn-edytuj-${id}" class="przycisk-maly przycisk-maly" onclick="odblokujEdycje(${id})">Edytuj</button>
+                                <button class="przycisk-maly przycisk-maly przycisk-blad" onclick="usunWiersz(${id})">Usuń</button>
                             </td>
                         </tr>
                         `;
                     }).join('');
-                } else { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-secondary);">Brak rekordów.</td></tr>'; }
+                } else { tbody.innerHTML = '<tr><td colspan="7" class="tekst-wysrodkowany tekst-szary">Brak rekordów.</td></tr>'; }
             }
             else if (zasob === 'zajecia') {
                 naglowekText.textContent = "Aktualna lista wszystkich zajęć w systemie";
@@ -674,17 +639,14 @@ function pokazPanelPlanisty(app) {
                             <td>${z.sala && z.sala.budynek ? z.sala.budynek.nazwab : ''} s. ${z.sala ? z.sala.numers : ''}</td>
                             <td id="row-zaj-uwagi-${id}">${z.uwagi || ''}</td>
                             <td id="akcje-${id}">
-                                <button id="btn-edytuj-${id}" class="przycisk-maly" style="${editBtnStyle}" onclick="odblokujEdycje(${id})">Edytuj</button>
-                                <button class="przycisk-maly" style="${delBtnStyle}" onclick="usunWiersz(${id})">Usuń</button>
+                                <button id="btn-edytuj-${id}" class="przycisk-maly przycisk-maly" onclick="odblokujEdycje(${id})">Edytuj</button>
+                                <button class="przycisk-maly przycisk-maly przycisk-blad" onclick="usunWiersz(${id})">Usuń</button>
                             </td>
                         </tr>
                         `;
                     }).join('');
-                } else { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-secondary);">Brak zdefiniowanych zajęć w bazie danych.</td></tr>'; }
+                } else { tbody.innerHTML = '<tr><td colspan="7" class="tekst-wysrodkowany tekst-szary">Brak zdefiniowanych zajęć w bazie danych.</td></tr>'; }
             }
-        })
-        .catch(() => {
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color: var(--color-error);">Nie udało się załadować podglądu danych.</td></tr>';
         });
     }
 
@@ -694,8 +656,7 @@ function pokazPanelPlanisty(app) {
 
         select.innerHTML = '<option value="">Ładowanie opcji...</option>';
 
-        fetch(url, { credentials: 'same-origin' })
-        .then(res => res.json())
+        apiCall(url)
         .then(dane => {
             if (dane.status === 'success' && dane[kluczDanych]) {
                 select.innerHTML = '<option value="">-- Wybierz z listy --</option>';
@@ -710,9 +671,6 @@ function pokazPanelPlanisty(app) {
             } else {
                 select.innerHTML = '<option value="">Nie udało się załadować danych</option>';
             }
-        })
-        .catch(() => {
-            select.innerHTML = '<option value="">Błąd połączenia z serwerem</option>';
         });
     }
 
