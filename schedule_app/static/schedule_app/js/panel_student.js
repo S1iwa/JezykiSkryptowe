@@ -69,16 +69,19 @@ function pokazPanelStudenta(app) {
                     <div class="pole odstep-maly">
                         <input type="text" id="szukaj-nazwisko" placeholder="Nazwisko">
                     </div>
-                    <button id="przycisk-szukaj" class="sidebar-btn">Szukaj</button>
+                    <div class="sidebar-akcje">
+                        <button id="przycisk-szukaj" class="sidebar-btn">Szukaj</button>
+                        <button id="przycisk-resetuj" class="sidebar-btn motyw">Resetuj</button>
+                    </div>
                     <div id="komunikat-szukaj" class="tekst-szary hidden odstep-maly"></div>
                 </div>
 
                 <hr class="sidebar-divider">
                 <div class="sidebar-akcje">
-                    <button id="przycisk-motyw-student" class="sidebar-btn motyw">${document.body.classList.contains('dark') ? '☀️ Jasny motyw' : '🌙 Ciemny motyw'}</button>
-                    <button id="przycisk-eksport-csv" class="sidebar-btn">⬇️ Pobierz plan (CSV)</button>
-                    <button id="przycisk-pokaz-haslo" class="sidebar-btn">🔑 Zmień hasło</button>
-                    <button id="przycisk-wyloguj" class="sidebar-btn danger">⬅️ Wyloguj się</button>
+                    <button id="przycisk-motyw-student" class="sidebar-btn motyw">${document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span> Jasny motyw' : '<span class="material-symbols-outlined">dark_mode</span> Ciemny motyw'}</button>
+                    <button id="przycisk-eksport-csv" class="sidebar-btn"><span class="material-symbols-outlined">download</span> Pobierz plan (CSV)</button>
+                    <button id="przycisk-pokaz-haslo" class="sidebar-btn"><span class="material-symbols-outlined">key</span> Zmień hasło</button>
+                    <button id="przycisk-wyloguj" class="sidebar-btn danger"><span class="material-symbols-outlined">logout</span> Wyloguj się</button>
                 </div>
             </aside>
 
@@ -136,7 +139,7 @@ function pokazPanelStudenta(app) {
     // Przełączanie motywu
     document.getElementById('przycisk-motyw-student').onclick = function() {
         toggleMotyw();
-        this.textContent = document.body.classList.contains('dark') ? '☀️ Jasny motyw' : '🌙 Ciemny motyw';
+        this.innerHTML = document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span> Jasny motyw' : '<span class="material-symbols-outlined">dark_mode</span> Ciemny motyw';
     };
 
     document.getElementById('przycisk-wyloguj').onclick = function() {
@@ -207,19 +210,29 @@ function pokazPanelStudenta(app) {
     document.getElementById('przycisk-szukaj').onclick = function() {
         var imieVal = document.getElementById('szukaj-imie').value.trim();
         var nazwiskoVal = document.getElementById('szukaj-nazwisko').value.trim();
+        wykonajWyszukiwanieProwadzacego(imieVal, nazwiskoVal);
+    };
+
+    document.getElementById('przycisk-resetuj').onclick = function() {
+        document.getElementById('szukaj-imie').value = '';
+        document.getElementById('szukaj-nazwisko').value = '';
+        wykonajWyszukiwanieProwadzacego('', '');
+    };
+
+    function wykonajWyszukiwanieProwadzacego(imieVal, nazwiskoVal) {
         var komunikat = document.getElementById('komunikat-szukaj');
         var tbody = document.getElementById('tbody-planu');
         var naglowek = document.getElementById('naglowek-tabeli');
 
         if (!imieVal && !nazwiskoVal) {
             document.getElementById('kontener-prowadzacych').classList.add('hidden');
-            komunikat.style.display = 'none';
+            komunikat.classList.add('hidden');
             tbody.innerHTML = renderujWiersze(planZajec);
             naglowek.textContent = 'Twój plan zajęć';
             return;
         }
 
-        komunikat.style.display = 'none';
+        komunikat.classList.add('hidden');
 
         apiCall(`/api/students/professors-information/?imie=${encodeURIComponent(imieVal)}&nazwisko=${encodeURIComponent(nazwiskoVal)}`)
         .then(dane => {
@@ -261,8 +274,8 @@ function pokazPanelStudenta(app) {
             } else {
                 kontener.classList.add('hidden');
                 komunikat.textContent = dane.message;
-                komunikat.style.color = 'var(--color-error, red)';
-                komunikat.style.display = 'block';
+                komunikat.classList.add('tekst-blad');
+                komunikat.classList.remove('hidden');
                 tbody.innerHTML = renderujWiersze(planZajec);
                 naglowek.textContent = 'Twój plan zajęć';
             }
@@ -270,8 +283,8 @@ function pokazPanelStudenta(app) {
         .catch(() => {
             document.getElementById('kontener-prowadzacych').classList.add('hidden');
             komunikat.textContent = 'Błąd połączenia z serwerem.';
-            komunikat.style.color = 'var(--color-error, red)';
-            komunikat.style.display = 'block';
+            komunikat.classList.add('tekst-blad');
+            komunikat.classList.remove('hidden');
         });
     };
 }

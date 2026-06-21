@@ -1,7 +1,7 @@
 function pokazLogowanie(app) {
     app.innerHTML = `
         <button id="przycisk-motywu-login" class="przycisk-motywu">
-            ${document.body.classList.contains('dark') ? '☀️' : '🌙'}
+            ${document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span>' : '<span class="material-symbols-outlined">dark_mode</span>'}
         </button>
         <div class="login-wrapper">
             <div class="formularz-logowania">
@@ -23,7 +23,7 @@ function pokazLogowanie(app) {
 
     document.getElementById('przycisk-motywu-login').onclick = function() {
         toggleMotyw();
-        this.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+        this.innerHTML = document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span>' : '<span class="material-symbols-outlined">dark_mode</span>';
     };
 
     document.getElementById('przycisk-login').onclick = function() {
