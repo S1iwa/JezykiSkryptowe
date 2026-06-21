@@ -220,6 +220,16 @@ function pokazPanelPlanisty(app) {
             }
         });
 
+        if (zasob === 'sala') {
+            let elBudynek = document.getElementById(`row-sala-budynek-${id}`);
+            if (elBudynek) {
+                elBudynek.setAttribute('data-oryginal', elBudynek.textContent.trim());
+                let originalIdb = elBudynek.getAttribute('data-idb');
+                elBudynek.innerHTML = `<select id="select-budynek-${id}" class="input-plik" style="width:100%; padding: 2px;"><option value="${originalIdb}">${elBudynek.textContent.trim()}</option></select>`;
+                uzupelnijWyborCrud('/api/get/budynek/', `select-budynek-${id}`, 'budynki', b => `${b.nazwab}`);
+            }
+        }
+
         // Zamiana przycisków na Zatwierdź i Anuluj
         var tdAkcje = document.getElementById(`akcje-${id}`);
         if (tdAkcje) {
@@ -256,6 +266,13 @@ function pokazPanelPlanisty(app) {
             }
         });
 
+        if (zasob === 'sala') {
+            let elBudynek = document.getElementById(`row-sala-budynek-${id}`);
+            if (elBudynek && elBudynek.hasAttribute('data-oryginal')) {
+                elBudynek.textContent = elBudynek.getAttribute('data-oryginal');
+            }
+        }
+
         // Przywrócenie przycisków Edytuj / Usuń
         var tdAkcje = document.getElementById(`akcje-${id}`);
         if (tdAkcje) {
@@ -285,7 +302,10 @@ function pokazPanelPlanisty(app) {
                 lbgodz: pobierzWartosc(`row-sub-godz-${id}`)
             };
         } else if (zasob === 'sala') {
+            var selectBudynek = document.getElementById(`select-budynek-${id}`);
+            var wybranyBudynek = selectBudynek ? selectBudynek.value : undefined;
             payload = {
+                idb: wybranyBudynek,
                 numers: pobierzWartosc(`row-sala-numer-${id}`),
                 typs: pobierzWartosc(`row-sala-typ-${id}`),
                 pojemnosc: pobierzWartosc(`row-sala-poj-${id}`)
@@ -410,7 +430,7 @@ function pokazPanelPlanisty(app) {
                     <label class="tekst-szary"><strong>Budynek:</strong></label>
                     <select id="sala-idb" class="input-plik"></select>
                 </div>
-                <button id="btn-sala-add" class="przycisk-akcja przycisk-sukces odstep-maly">Dodaj obiekt (POST)</button>
+                <button id="btn-sala-add" class="przycisk-akcja przycisk-sukces odstep-maly">Dodaj obiekt</button>
             `;
 
 
@@ -435,7 +455,7 @@ function pokazPanelPlanisty(app) {
                 <div class="pole"><input type="text" id="prac-nrtel" placeholder="Numer telefonu"></div>
                 <div class="pole"><input type="password" id="prac-haslo" placeholder="Hasło konta"></div>
                 <div class="pole"><input type="text" id="prac-rola" placeholder="Rola w systemie (wykladowca / planista)"></div>
-                <button id="btn-prac-add" class="przycisk-akcja przycisk-sukces odstep-maly">Dodaj obiekt (POST)</button>
+                <button id="btn-prac-add" class="przycisk-akcja przycisk-sukces odstep-maly">Dodaj obiekt</button>
             `;
             document.getElementById('btn-prac-add').onclick = function() {
                 wykonajZapytanieCrud('/api/CRUD/pracownik/', 'POST', {
@@ -461,7 +481,7 @@ function pokazPanelPlanisty(app) {
                 <div class="pole"><input type="text" id="grup-rokakadem" placeholder="Rok akademicki (np. 2025/2026)"></div>
                 <div class="pole"><input type="number" id="grup-liczbaos" placeholder="Liczba studentów (np. 24)"></div>
                 <div class="pole"><input type="text" id="grup-opis" placeholder="Krótki opis grupy"></div>
-                <button id="btn-grup-add" class="przycisk-akcja przycisk-sukces odstep-maly">Dodaj obiekt (POST)</button>
+                <button id="btn-grup-add" class="przycisk-akcja przycisk-sukces odstep-maly">Dodaj obiekt</button>
             `;
 
 
@@ -503,7 +523,7 @@ function pokazPanelPlanisty(app) {
                     <select id="zaj-idg" class="input-plik"></select>
                 </div>
 
-                <button id="btn-zaj-add" class="przycisk-akcja przycisk-sukces odstep-maly">Zaplanuj zajęcia (POST)</button>
+                <button id="btn-zaj-add" class="przycisk-akcja przycisk-sukces odstep-maly">Zaplanuj zajęcia</button>
             `;
 
 
@@ -594,19 +614,22 @@ function pokazPanelPlanisty(app) {
             }
             else if (zasob === 'sala') {
                 naglowekText.textContent = "Aktualna lista sal wykładowych";
-                thr.innerHTML = `<th>ID</th><th>Numer sali</th><th>Typ</th><th>Pojemność</th><th>Akcje</th>`;
+                thr.innerHTML = `<th>ID</th><th>Budynek</th><th>Numer sali</th><th>Typ</th><th>Pojemność</th><th>Akcje</th>`;
                 if(dane.sale && dane.sale.length > 0) {
                     tbody.innerHTML = dane.sale.map(s => {
                         var id = s.ids || s.id;
+                        var nazwaBudynku = s.budynek ? s.budynek.nazwab : '';
+                        var idbBudynku = s.budynek ? s.budynek.idb : '';
                         return `
                         <tr>
                             <td><strong>${id}</strong></td>
+                            <td id="row-sala-budynek-${id}" data-idb="${idbBudynku}">${nazwaBudynku}</td>
                             <td id="row-sala-numer-${id}">${s.numers}</td>
                             <td id="row-sala-typ-${id}">${s.typs}</td>
                             <td id="row-sala-poj-${id}">${s.pojemnosc}</td>
                             <td id="akcje-${id}">
-                                <button id="btn-edytuj-${id}" class="przycisk-maly przycisk-maly" onclick="odblokujEdycje(${id})">Edytuj</button>
-                                <button class="przycisk-maly przycisk-maly przycisk-blad" onclick="usunWiersz(${id})">Usuń</button>
+                                <button id="btn-edytuj-${id}" class="przycisk-maly" onclick="odblokujEdycje(${id})">Edytuj</button>
+                                <button class="przycisk-maly przycisk-blad" onclick="usunWiersz(${id})">Usuń</button>
                             </td>
                         </tr>
                         `;
@@ -695,9 +718,8 @@ function pokazPanelPlanisty(app) {
         apiCall(url)
         .then(dane => {
             if (dane.status === 'success' && dane[kluczDanych]) {
-                select.innerHTML = '<option value="">-- Wybierz z listy --</option>';
+                select.innerHTML = '<option value="">Wybierz z listy</option>';
                 dane[kluczDanych].forEach(item => {
-                    // Obsługa różnych nazw pól kluczy głównych w bazie
                     const id = item.id || item.ids || item.idp || item.idpr || item.idg || item.idz || item.idb || item.idk;
                     const option = document.createElement('option');
                     option.value = id;

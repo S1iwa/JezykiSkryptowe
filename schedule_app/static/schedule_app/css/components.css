@@ -80,7 +80,7 @@ button {
 .przycisk-maly {
     width: auto;
     padding: 8px 16px;
-    background: var(--color-error);
+    background: var(--gray-dark);
     font-size: 14px;
 }
 
@@ -173,9 +173,20 @@ button {
 }
 
 .input-plik {
-    font-size: 13px;
+    font-size: 14px;
     width: 100%;
     color: var(--text-primary);
+    background: var(--bg-input);
+    border: 1px solid var(--gray-medium);
+    border-radius: 4px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+
+.input-plik:focus {
+    border-color: var(--color-main);
 }
 
 .tekst-wysrodkowany {
