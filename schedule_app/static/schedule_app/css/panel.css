@@ -161,6 +161,91 @@
     margin-bottom: 20px;
 }
 
+/* Układ i odstępy - zastępstwo dla inline style */
+.uklad-kolumnowy {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.kolumna-lewa {
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.kolumna-prawa {
+    flex: 2;
+    min-width: 400px;
+    overflow-x: auto;
+}
+
+.separator-pionowy {
+    width: 1px;
+    background-color: var(--gray-light);
+    align-self: stretch;
+    min-height: 400px;
+}
+
+.naglowek-sekcji {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+
+.naglowek-maly {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.odstep-maly {
+    margin-bottom: 8px;
+}
+
+.odstep-sredni {
+    margin-bottom: 16px;
+}
+
+.odstep-duzy {
+    margin-bottom: 24px;
+}
+
+.odstep-bardzo-duzy {
+    margin-bottom: 40px;
+}
+
+.sekcja-pelna {
+    max-width: 100%;
+}
+
+.wyszukiwarka-pozioma {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.pole-wyszukiwania {
+    margin-bottom: 0;
+    min-width: 120px;
+}
+
+.flex-wiersz {
+    display: flex;
+    gap: 10px;
+}
+
+.flex-dol {
+    display: flex;
+    align-items: flex-end;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
 @media (max-width: 700px) {
     .panel-layout {
         flex-direction: column;
