@@ -1,4 +1,4 @@
-# University Schedule — Plan Zajęć
+# Plan Zajęć
 
 ## Wstęp
 
