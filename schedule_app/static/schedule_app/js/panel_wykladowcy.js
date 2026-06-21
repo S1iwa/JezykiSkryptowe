@@ -59,13 +59,54 @@ function pokazPanelWykladowcy(app) {
                 
                 <hr class="sidebar-divider">
                 
-                <div class="sidebar-akcje">
-                    <button id="nav-plan" class="sidebar-btn active"><span class="material-symbols-outlined">calendar_month</span> Mój plan zajęć</button>
-                    <button id="nav-sale" class="sidebar-btn"><span class="material-symbols-outlined">meeting_room</span> Wyszukaj wolną salę</button>
-                    <button id="nav-prowadzacy" class="sidebar-btn"><span class="material-symbols-outlined">groups</span> Lista prowadzących</button>
-                    
-                    <div class="sidebar-divider" ></div>
+                <!-- WYSZUKIWARKA SAL -->
+                <div>
+                    <span class="sidebar-info-label odstep-maly">Szukaj wolnej sali</span>
+                    <div class="pole odstep-maly">
+                        <select id="szukaj-sale-dzien">
+                            <option value="Poniedziałek">Poniedziałek</option>
+                            <option value="Wtorek">Wtorek</option>
+                            <option value="Środa">Środa</option>
+                            <option value="Czwartek">Czwartek</option>
+                            <option value="Piątek">Piątek</option>
+                            <option value="Sobota">Sobota</option>
+                            <option value="Niedziela">Niedziela</option>
+                        </select>
+                    </div>
+                    <div class="pole odstep-maly">
+                        <input type="time" id="szukaj-sale-od" placeholder="Od np. 08:00">
+                    </div>
+                    <div class="pole odstep-maly">
+                        <input type="time" id="szukaj-sale-do" placeholder="Do np. 10:00">
+                    </div>
+                    <div class="sidebar-akcje">
+                        <button id="przycisk-szukaj-sal" class="sidebar-btn">Szukaj Sali</button>
+                        <button id="przycisk-resetuj-sal" class="sidebar-btn motyw">Resetuj</button>
+                    </div>
+                    <div id="komunikat-sale" class="tekst-szary hidden odstep-maly"></div>
+                </div>
 
+                <hr class="sidebar-divider">
+
+                <!-- WYSZUKIWARKA PROWADZĄCYCH -->
+                <div>
+                    <span class="sidebar-info-label odstep-maly">Szukaj prowadzącego</span>
+                    <div class="pole odstep-maly">
+                        <input type="text" id="szukaj-imie" placeholder="Imię">
+                    </div>
+                    <div class="pole odstep-maly">
+                        <input type="text" id="szukaj-nazwisko" placeholder="Nazwisko">
+                    </div>
+                    <div class="sidebar-akcje">
+                        <button id="przycisk-szukaj-prowadzacy" class="sidebar-btn">Szukaj Prowadzącego</button>
+                        <button id="przycisk-resetuj-prowadzacy" class="sidebar-btn motyw">Resetuj</button>
+                    </div>
+                    <div id="komunikat-szukaj" class="tekst-szary hidden odstep-maly"></div>
+                </div>
+
+                <hr class="sidebar-divider">
+
+                <div class="sidebar-akcje">
                     <button id="przycisk-motyw-wykladowca" class="sidebar-btn motyw">${document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span> Jasny motyw' : '<span class="material-symbols-outlined">dark_mode</span> Ciemny motyw'}</button>
                     <button id="przycisk-eksport-csv-wykladowca" class="sidebar-btn"><span class="material-symbols-outlined">download</span> Pobierz plan (CSV)</button>
                     <button id="przycisk-pokaz-haslo-wykladowca" class="sidebar-btn"><span class="material-symbols-outlined">key</span> Zmień hasło</button>
@@ -73,63 +114,23 @@ function pokazPanelWykladowcy(app) {
                 </div>
             </aside>
             <main class="panel-content">
-                <!-- WIDOK 1: MÓJ PLAN -->
-                <div id="widok-plan">
-                    <h3>Twój plan zajęć</h3>
-                    <table class="tabela-planu">
-                        <thead>
-                            <tr>
-                                <th>Dzień</th>
-                                <th>Godziny</th>
-                                <th>Przedmiot</th>
-                                <th>Sala</th>
-                                <th>Kierunek (semestr)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${wierszeTabeli}
-                        </tbody>
-                    </table>
+                <!-- ZMIANA HASŁA -->
+                <div id="sekcja-haslo-wykladowca" class="content-sekcja hidden odstep-duzy">
+                    <h3 class="naglowek-maly">Zmiana hasła</h3>
+                    <div id="komunikat-haslo-wykladowca" class="blad hidden"></div>
+                    <div class="pole">
+                        <input type="password" id="stare-haslo-wykladowca" placeholder="Stare hasło">
+                    </div>
+                    <div class="pole">
+                        <input type="password" id="nowe-haslo-wykladowca" placeholder="Nowe hasło">
+                    </div>
+                    <button id="przycisk-zmien-haslo-wykladowca" class="przycisk-akcja">Potwierdź zmianę</button>
                 </div>
 
-                <!-- WIDOK 2: WYSZUKIWARKA SAL -->
-                <div id="widok-sale" class="hidden">
-                    <div id="sekcja-szukaj" class="hidden">
-                    <div class="content-sekcja sekcja-pelna">
-                        <div class="wyszukiwarka-pozioma">
-                            <div class="pole pole-wyszukiwania flex-1">
-                                <label>Sala / Budynek</label>
-                                <input type="text" id="szukaj-sala" placeholder="Np. A1, 101">
-                            </div>
-                            <div class="pole pole-wyszukiwania flex-1">
-                                <label>Dzień tygodnia</label>
-                                <select id="szukaj-sale-dzien">
-                                    <option value="Poniedziałek">Poniedziałek</option>
-                                    <option value="Wtorek">Wtorek</option>
-                                    <option value="Środa">Środa</option>
-                                    <option value="Czwartek">Czwartek</option>
-                                    <option value="Piątek">Piątek</option>
-                                    <option value="Sobota">Sobota</option>
-                                    <option value="Niedziela">Niedziela</option>
-                                </select>
-                            </div>
-                            <div class="pole pole-wyszukiwania flex-1">
-                                <label>Prowadzący</label>
-                                <input type="text" id="szukaj-prowadzacy" placeholder="Imię lub Nazwisko">
-                            </div>
-                            <div class="pole pole-wyszukiwania flex-1">
-                                <label>Przedmiot</label>
-                                <input type="text" id="szukaj-przedmiot" placeholder="Nazwa przedmiotu">
-                            </div>
-                            <div class="flex-dol">
-                                <button id="btn-szukaj-zajecia" class="przycisk-akcja">Szukaj wolnych / zajęć</button>
-                            </div>
-                        </div>
-                        <div id="komunikat-sale" class="blad hidden"></div>
-                    </div>
-                    </div>
-                    
-                    <table class="tabela-planu hidden" id="tabela-wynikow-sal">
+                <!-- WYNIKI SZUKANIA SAL -->
+                <div id="kontener-sal" class="hidden odstep-bardzo-duzy">
+                    <h3 class="odstep-sredni">Znalezione sale</h3>
+                    <table class="tabela-planu" id="tabela-wynikow-sal">
                         <thead>
                             <tr>
                                 <th>Budynek</th>
@@ -142,15 +143,15 @@ function pokazPanelWykladowcy(app) {
                     </table>
                 </div>
 
-                <!-- WIDOK 3: LISTA PROWADZĄCYCH -->
-                <div id="widok-prowadzacy" class="hidden">
-                    <h3>Lista prowadzących</h3>
-                    <div id="komunikat-szukaj" class="blad hidden"></div>
-                    <table class="tabela-planu hidden odstep-gorny" id="tabela-wynikow-prowadzacy">
+                <!-- WYNIKI SZUKANIA PROWADZĄCYCH -->
+                <div id="kontener-prowadzacych" class="hidden odstep-bardzo-duzy">
+                    <h3 class="odstep-sredni">Znalezieni prowadzący</h3>
+                    <table class="tabela-planu" id="tabela-wynikow-prowadzacy">
                         <thead>
                             <tr>
                                 <th>Stopień</th>
                                 <th>Imię i nazwisko</th>
+                                <th>E-mail</th>
                                 <th>Prowadzone przedmioty</th>
                             </tr>
                         </thead>
@@ -158,18 +159,22 @@ function pokazPanelWykladowcy(app) {
                     </table>
                 </div>
 
-                <!-- ZMIANA HASŁA -->
-                <div id="sekcja-haslo-wykladowca" class="content-sekcja hidden odstep-gorny">
-                    <h3 class="naglowek-maly">Zmiana hasła</h3>
-                    <div id="komunikat-haslo-wykladowca" class="blad hidden"></div>
-                    <div class="pole">
-                        <input type="password" id="stare-haslo-wykladowca" placeholder="Stare hasło">
-                    </div>
-                    <div class="pole">
-                        <input type="password" id="nowe-haslo-wykladowca" placeholder="Nowe hasło">
-                    </div>
-                    <button id="przycisk-zmien-haslo-wykladowca" class="przycisk-akcja">Potwierdź zmianę</button>
-                </div>
+                <!-- MÓJ PLAN -->
+                <h3 class="odstep-sredni">Twój plan zajęć</h3>
+                <table class="tabela-planu">
+                    <thead>
+                        <tr>
+                            <th>Dzień</th>
+                            <th>Godziny</th>
+                            <th>Przedmiot</th>
+                            <th>Sala</th>
+                            <th>Kierunek (semestr)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${wierszeTabeli}
+                    </tbody>
+                </table>
             </main>
         </div>
     `;
@@ -252,50 +257,48 @@ function pokazPanelWykladowcy(app) {
         var komunikat = document.getElementById('komunikat-sale');
         var tabela = document.getElementById('tabela-wynikow-sal');
         var wyniki = document.getElementById('wyniki-sal');
+        var kontener = document.getElementById('kontener-sal');
 
         komunikat.classList.add('hidden');
         wyniki.innerHTML = '';
-        tabela.classList.add('hidden');
+        kontener.classList.add('hidden');
 
         if (!odGodz || !doGodz) {
-            komunikat.textContent = 'Proszę podać godziny rozpoczęcia i zakończenia.';
             komunikat.classList.remove('hidden');
+            komunikat.innerHTML = '<small>Proszę podać godziny rozpoczęcia i zakończenia.</small>';
             return;
         }
 
-        apiCall('/api/schedule/find-audience/')
+        apiCall(`/api/schedule/find-audience/?dzien=${encodeURIComponent(dzien)}&odGodz=${encodeURIComponent(odGodz)}&doGodz=${encodeURIComponent(doGodz)}`)
         .then(dane => {
             if (dane.status === 'success') {
-                var sale = dane.sale;
+                kontener.classList.remove('hidden');
+                var saleDoWyswietlenia = dane.wolne_sale || dane.sale || []; // Backend może to różnie zwracać
                 
-                var wolneSale = sale.filter(sala => {
-                    // Sprawdzamy czy sala ma konflikt
-                    for (let z of sala.zajecia) {
-                        if (z.dzien === dzien) {
-                            let [szOdh, szOdm] = odGodz.split(':').map(Number);
-                            let [szDoh, szDom] = doGodz.split(':').map(Number);
-                            let szOdMin = szOdh * 60 + szOdm;
-                            let szDoMin = szDoh * 60 + szDom;
+                // Jeśli backend nie filtruje po stronie serwera, robimy to po stronie klienta:
+                if (!dane.wolne_sale && dane.sale) {
+                    saleDoWyswietlenia = dane.sale.filter(sala => {
+                        for (let z of sala.zajecia) {
+                            if (z.dzien === dzien) {
+                                let szOdMin = parseInt(odGodz.split(':')[0]) * 60 + parseInt(odGodz.split(':')[1]);
+                                let szDoMin = parseInt(doGodz.split(':')[0]) * 60 + parseInt(doGodz.split(':')[1]);
+                                let zOdMin = parseInt(z.godzrozp.split(':')[0]) * 60 + parseInt(z.godzrozp.split(':')[1]);
+                                let zDoMin = parseInt(z.godzzak.split(':')[0]) * 60 + parseInt(z.godzzak.split(':')[1]);
 
-                            let [zOdh, zOdm] = z.godzrozp.split(':').map(Number);
-                            let [zDoh, zDom] = z.godzzak.split(':').map(Number);
-                            let zOdMin = zOdh * 60 + zOdm;
-                            let zDoMin = zDoh * 60 + zDom;
-
-                            // Kolizja, gdy szukany czas zachodzi na czas zajęć
-                            if (szOdMin < zDoMin && szDoMin > zOdMin) {
-                                return false;
+                                // Konflikt, gdy się pokrywają
+                                if (szOdMin < zDoMin && szDoMin > zOdMin) {
+                                    return false;
+                                }
                             }
                         }
-                    }
-                    return true;
-                });
+                        return true;
+                    });
+                }
 
-                tabela.classList.remove('hidden');
-                if (dane.wolne_sale.length === 0) {
+                if (saleDoWyswietlenia.length === 0) {
                     wyniki.innerHTML = '<tr><td colspan="4" class="tekst-wysrodkowany">Brak wolnych sal w podanym przedziale czasowym.</td></tr>';
                 } else {
-                    wyniki.innerHTML = dane.wolne_sale.map(s => `
+                    wyniki.innerHTML = saleDoWyswietlenia.map(s => `
                         <tr>
                             <td>${s.budynek.nazwab} <br><small class="tekst-szary">${s.budynek.adresb}</small></td>
                             <td><strong>${s.numers}</strong></td>
@@ -311,66 +314,65 @@ function pokazPanelWykladowcy(app) {
         });
     };
 
-    function zaladujProwadzacych() {
+    document.getElementById('przycisk-resetuj-sal').onclick = function() {
+        document.getElementById('szukaj-sale-dzien').value = 'Poniedziałek';
+        document.getElementById('szukaj-sale-od').value = '';
+        document.getElementById('szukaj-sale-do').value = '';
+        document.getElementById('kontener-sal').classList.add('hidden');
+        document.getElementById('komunikat-sale').classList.add('hidden');
+    };
+
+    document.getElementById('przycisk-szukaj-prowadzacy').onclick = function() {
+        var imieVal = document.getElementById('szukaj-imie').value.trim();
+        var nazwiskoVal = document.getElementById('szukaj-nazwisko').value.trim();
+        wykonajWyszukiwanieProwadzacego(imieVal, nazwiskoVal);
+    };
+
+    document.getElementById('przycisk-resetuj-prowadzacy').onclick = function() {
+        document.getElementById('szukaj-imie').value = '';
+        document.getElementById('szukaj-nazwisko').value = '';
+        wykonajWyszukiwanieProwadzacego('', '');
+    };
+
+    function wykonajWyszukiwanieProwadzacego(imieVal, nazwiskoVal) {
         var komunikat = document.getElementById('komunikat-szukaj');
         var wynikiLista = document.getElementById('wyniki-wyszukiwania');
-        var tabelaProwadzacy = document.getElementById('tabela-wynikow-prowadzacy');
+        var kontener = document.getElementById('kontener-prowadzacych');
 
         komunikat.classList.add('hidden');
-        wynikiLista.innerHTML = '';
-        tabelaProwadzacy.classList.add('hidden');
 
-        apiCall(`/api/students/professors-information/?imie=&nazwisko=`)
+        if (!imieVal && !nazwiskoVal) {
+            kontener.classList.add('hidden');
+            return;
+        }
+
+        wynikiLista.innerHTML = '';
+
+        apiCall(`/api/students/professors-information/?imie=${encodeURIComponent(imieVal)}&nazwisko=${encodeURIComponent(nazwiskoVal)}`)
         .then(dane => {
             if (dane.status === 'success') {
-                tabelaProwadzacy.classList.remove('hidden');
+                kontener.classList.remove('hidden');
                 if (dane.prowadzacy.length === 0) {
-                    wynikiLista.innerHTML = '<tr><td colspan="3" class="tekst-wysrodkowany">Brak prowadzących w bazie.</td></tr>';
+                    wynikiLista.innerHTML = '<tr><td colspan="3" class="tekst-wysrodkowany tekst-szary">Brak pasujących wyników.</td></tr>';
                 } else {
-                    dane.prowadzacy.forEach(p => {
+                    wynikiLista.innerHTML = dane.prowadzacy.map(p => {
                         var przedmiotyStr = p.przedmioty.map(pr => pr.nazwap + ' <span class="tekst-szary">(' + pr.formap + ')</span>').join('<br>');
-                        wynikiLista.innerHTML += `
+                        return `
                             <tr>
                                 <td>${p.stopien || '-'}</td>
                                 <td><strong>${p.imie} ${p.nazwisko}</strong></td>
-                                <td>${przedmiotyStr || 'Brak przypisanych przedmiotów'}</td>
+                                <td>${p.email || '-'}</td>
+                                <td>${przedmiotyStr || '<span class="tekst-szary">Brak przypisanych przedmiotów</span>'}</td>
                             </tr>
                         `;
                     }).join('');
                 }
             } else {
                 komunikat.classList.remove('hidden');
-                komunikat.style.color = 'red';
                 komunikat.textContent = dane.message;
             }
         });
     }
 
-    // ===== NAWIGACJA (SPA TABS) =====
-    var prowadzacyZaladowani = false;
-
-    function zmienWidok(widokId, przyciskId) {
-        document.getElementById('widok-plan').classList.add('hidden');
-        document.getElementById('widok-sale').classList.add('hidden');
-        document.getElementById('widok-prowadzacy').classList.add('hidden');
-        
-        document.getElementById('nav-plan').classList.remove('active');
-        document.getElementById('nav-sale').classList.remove('active');
-        document.getElementById('nav-prowadzacy').classList.remove('active');
-        
-        document.getElementById(widokId).classList.remove('hidden');
-        document.getElementById(przyciskId).classList.add('active');
-
-        // Zamknięcie sekcji zmiany hasła gdy zmieniamy widok
-        document.getElementById('sekcja-haslo-wykladowca').classList.add('hidden');
-
-        if (widokId === 'widok-prowadzacy' && !prowadzacyZaladowani) {
-            zaladujProwadzacych();
-            prowadzacyZaladowani = true;
-        }
-    }
-
-    document.getElementById('nav-plan').onclick = () => zmienWidok('widok-plan', 'nav-plan');
-    document.getElementById('nav-sale').onclick = () => zmienWidok('widok-sale', 'nav-sale');
-    document.getElementById('nav-prowadzacy').onclick = () => zmienWidok('widok-prowadzacy', 'nav-prowadzacy');
+    router();
 }
