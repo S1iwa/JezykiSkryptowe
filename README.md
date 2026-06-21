@@ -1,5 +1,21 @@
 # University Schedule — Plan Zajęć
 
+## Wstęp
+
+Projekt ten ma na celu umożliwić sprawne i intuincyjne zarządzanie planami zajęć na uczelni. Jest przeznaczony zarówno dla studentów, prowadzących jak i pracowników uczelni układających plany (planistów). Każdy z tych typów użytkowników ma dostęp do dedykowanego panelu i posiada odpowiednie uprawnienia. 
+
+## Użytkownicy, uprawnienia i przykładowe dane
+<img width="1867" height="936" alt="image" src="https://github.com/user-attachments/assets/fbc607ac-3fcf-47f1-ba17-7dc2ca65a0c4" />
+Student posiada uprawnienia do przeglądania swojego planu, eksportu go do pliku csv oraz do wyszukania w swoim planie zajęć prowadzonych przez danego prowadzącego.
+
+<img width="1883" height="952" alt="image" src="https://github.com/user-attachments/assets/5f8d01f0-9a2c-42b3-b694-6db7ce49abb4" />
+Prowadzący tak samo jak student posiada uprawnienia do przeglądania własnego planu wraz z eksportem do csv. Ma również dostęp do wyszukiwarki wolnych sal w podanych godzinach oraz może przeglądać listę prowadzących
+
+<img width="1866" height="962" alt="image" src="https://github.com/user-attachments/assets/c9f64ad2-1f64-4976-b524-6026bf64f9b8" />
+Planista ma uprawnienia CRUD do tabel zawierających: Przedmioty, Sale wykładowe, Grupy studenckie, Pracowników, Plany. Może ponadto importować bądź eksportować dane z tych tabel do pliku csv. 
+
+Ponadto wszyscy zalogowani użytkownicy mogą zmienić swoje hasło. 
+
 ## Uruchamianie projektu
 
 Nie ma potrzeby instalowania Pythona ani PostgreSQL — wystarczy Docker.
