@@ -2,17 +2,45 @@
 function router() {
     var sciezka = window.location.pathname;
     var app = document.getElementById('app');
+    var rola = sessionStorage.getItem('rola');
 
     if (sciezka === '/logowanie/' || sciezka === '/logowanie') {
         pokazLogowanie(app);
     } else if (sciezka === '/panel-studenta/' || sciezka === '/panel-studenta') {
-        pokazPanelStudenta(app);
+        if (rola !== 'student') {
+            history.pushState({}, '', '/logowanie/');
+            pokazLogowanie(app);
+        } else {
+            pokazPanelStudenta(app);
+        }
     } else if (sciezka === '/panel-wykladowcy/' || sciezka === '/panel-wykladowcy') {
-        pokazPanelWykladowcy(app);
+        if (rola !== 'wykladowca') {
+            history.pushState({}, '', '/logowanie/');
+            pokazLogowanie(app);
+        } else {
+            pokazPanelWykladowcy(app);
+        }
     } else if (sciezka === '/panel-planisty/' || sciezka === '/panel-planisty') {
-        pokazPanelPlanisty(app);
+        if (rola !== 'planista') {
+            history.pushState({}, '', '/logowanie/');
+            pokazLogowanie(app);
+        } else {
+            pokazPanelPlanisty(app);
+        }
     } else {
-        app.innerHTML = '<h1>Strona główna</h1>';
+        if (rola === 'student') {
+            history.pushState({}, '', '/panel-studenta/');
+            pokazPanelStudenta(app);
+        } else if (rola === 'wykladowca') {
+            history.pushState({}, '', '/panel-wykladowcy/');
+            pokazPanelWykladowcy(app);
+        } else if (rola === 'planista') {
+            history.pushState({}, '', '/panel-planisty/');
+            pokazPanelPlanisty(app);
+        } else {
+            history.pushState({}, '', '/logowanie/');
+            pokazLogowanie(app);
+        }
     }
 }
 
