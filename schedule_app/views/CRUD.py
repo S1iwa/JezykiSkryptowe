@@ -328,6 +328,10 @@ def api_CRUD_pracownik(request, pracownik_id=None):
             return JsonResponse({'status': 'error', 'message': 'Konto z podanym adresem email już istnieje'},
                                 status=409)
 
+        nrtel = data.get('nrtel')
+        if nrtel and Pracownicy.objects.filter(nrtel=nrtel).exists():
+            return JsonResponse({'status': 'error', 'message': 'Konto z podanym numerem telefonu już istnieje'}, status=409)
+
         nowy_pracownik = Pracownicy.objects.create(
             stopien=data.get('stopien'),
             nazwisko=data.get('nazwisko'),
@@ -361,11 +365,15 @@ def api_CRUD_pracownik(request, pracownik_id=None):
             return JsonResponse({'status': 'error', 'message': 'Konto z podanym adresem email już istnieje'},
                                 status=409)
 
+        nowy_nrtel = data.get('nrtel', pracownik.nrtel)
+        if nowy_nrtel and nowy_nrtel != pracownik.nrtel and Pracownicy.objects.filter(nrtel=nowy_nrtel).exists():
+            return JsonResponse({'status': 'error', 'message': 'Konto z podanym numerem telefonu już istnieje'}, status=409)
+
         pracownik.stopien = data.get('stopien', pracownik.stopien)
         pracownik.nazwisko = data.get('nazwisko', pracownik.nazwisko)
         pracownik.imie = data.get('imie', pracownik.imie)
         pracownik.email = nowy_email
-        pracownik.nrtel = data.get('nrtel', pracownik.nrtel)
+        pracownik.nrtel = nowy_nrtel
         pracownik.rola = data.get('rola', pracownik.rola)
 
         haslo = data.get('haslo')
@@ -656,12 +664,16 @@ def api_add_delete_account(request, typ_konta=None, konto_id=None):
                     {'status': 'error', 'message': f'Brakujące pola dla pracownika: {", ".join(brakujace)}'},
                     status=400)
 
+            nrtel = data.get('nrtel', '')
+            if nrtel and Pracownicy.objects.filter(nrtel=nrtel).exists():
+                return JsonResponse({'status': 'error', 'message': 'Konto z podanym numerem telefonu już istnieje'}, status=409)
+
             nowy = Pracownicy.objects.create(
                 stopien=data.get('stopien', ''),
                 nazwisko=data.get('nazwisko'),
                 imie=data.get('imie'),
                 email=email,
-                nrtel=data.get('nrtel', ''),
+                nrtel=nrtel,
                 haslo=make_password(haslo),
                 rola=data.get('rola')
             )
