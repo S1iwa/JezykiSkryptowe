@@ -269,6 +269,8 @@ def api_CRUD_sala(request, sala_id=None):
         # Jeśli przesłano nowe idb, zamieniamy budynek
         nowy_budynek = sala.idb
         if 'idb' in data:
+            if not data['idb'] or str(data['idb']).strip() == "":
+                return JsonResponse({'status': 'error', 'message': 'Musisz wybrać budynek'}, status=400)
             nowy_budynek = Budynki.objects.filter(idb=data['idb']).first()
             if not nowy_budynek:
                 return JsonResponse({'status': 'error', 'message': 'Podany budynek nie istnieje'}, status=404)
