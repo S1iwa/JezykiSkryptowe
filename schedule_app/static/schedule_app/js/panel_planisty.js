@@ -225,8 +225,8 @@ function pokazPanelPlanisty(app) {
             if (elBudynek) {
                 elBudynek.setAttribute('data-oryginal', elBudynek.textContent.trim());
                 let originalIdb = elBudynek.getAttribute('data-idb');
-                elBudynek.innerHTML = `<select id="select-budynek-${id}" class="input-plik" style="width:100%; padding: 2px;"><option value="${originalIdb}">${elBudynek.textContent.trim()}</option></select>`;
-                uzupelnijWyborCrud('/api/get/budynek/', `select-budynek-${id}`, 'budynki', b => `${b.nazwab}`);
+                elBudynek.innerHTML = `<select id="select-budynek-${id}" class="input-plik" style="width:100%; padding: 2px;"></select>`;
+                uzupelnijWyborCrud('/api/get/budynek/', `select-budynek-${id}`, 'budynki', b => `${b.nazwab}`, originalIdb);
             }
         }
 
@@ -709,7 +709,7 @@ function pokazPanelPlanisty(app) {
         });
     }
 
-    function uzupelnijWyborCrud(url, elementId, kluczDanych, formatujNazwe) {
+    function uzupelnijWyborCrud(url, elementId, kluczDanych, formatujNazwe, wartoscDomyslna = null) {
         const select = document.getElementById(elementId);
         if (!select) return;
 
@@ -718,12 +718,15 @@ function pokazPanelPlanisty(app) {
         apiCall(url)
         .then(dane => {
             if (dane.status === 'success' && dane[kluczDanych]) {
-                select.innerHTML = '<option value="">Wybierz z listy</option>';
+                select.innerHTML = '<option value="">-- Wybierz z listy --</option>';
                 dane[kluczDanych].forEach(item => {
                     const id = item.id || item.ids || item.idp || item.idpr || item.idg || item.idz || item.idb || item.idk;
                     const option = document.createElement('option');
                     option.value = id;
                     option.textContent = formatujNazwe(item);
+                    if (wartoscDomyslna !== null && String(id) === String(wartoscDomyslna)) {
+                        option.selected = true;
+                    }
                     select.appendChild(option);
                 });
             } else {
