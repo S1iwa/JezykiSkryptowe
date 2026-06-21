@@ -69,7 +69,10 @@ function pokazPanelStudenta(app) {
                     <div class="pole odstep-maly">
                         <input type="text" id="szukaj-nazwisko" placeholder="Nazwisko">
                     </div>
-                    <button id="przycisk-szukaj" class="sidebar-btn">Szukaj</button>
+                    <div class="sidebar-akcje">
+                        <button id="przycisk-szukaj" class="sidebar-btn">Szukaj</button>
+                        <button id="przycisk-resetuj" class="sidebar-btn motyw">Resetuj</button>
+                    </div>
                     <div id="komunikat-szukaj" class="tekst-szary hidden odstep-maly"></div>
                 </div>
 
@@ -207,6 +210,16 @@ function pokazPanelStudenta(app) {
     document.getElementById('przycisk-szukaj').onclick = function() {
         var imieVal = document.getElementById('szukaj-imie').value.trim();
         var nazwiskoVal = document.getElementById('szukaj-nazwisko').value.trim();
+        wykonajWyszukiwanieProwadzacego(imieVal, nazwiskoVal);
+    };
+
+    document.getElementById('przycisk-resetuj').onclick = function() {
+        document.getElementById('szukaj-imie').value = '';
+        document.getElementById('szukaj-nazwisko').value = '';
+        wykonajWyszukiwanieProwadzacego('', '');
+    };
+
+    function wykonajWyszukiwanieProwadzacego(imieVal, nazwiskoVal) {
         var komunikat = document.getElementById('komunikat-szukaj');
         var tbody = document.getElementById('tbody-planu');
         var naglowek = document.getElementById('naglowek-tabeli');
