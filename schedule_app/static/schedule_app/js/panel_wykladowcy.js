@@ -114,18 +114,7 @@ function pokazPanelWykladowcy(app) {
                 </div>
             </aside>
             <main class="panel-content">
-                <!-- ZMIANA HASŁA -->
-                <div id="sekcja-haslo-wykladowca" class="content-sekcja hidden odstep-duzy">
-                    <h3 class="naglowek-maly">Zmiana hasła</h3>
-                    <div id="komunikat-haslo-wykladowca" class="blad hidden"></div>
-                    <div class="pole">
-                        <input type="password" id="stare-haslo-wykladowca" placeholder="Stare hasło">
-                    </div>
-                    <div class="pole">
-                        <input type="password" id="nowe-haslo-wykladowca" placeholder="Nowe hasło">
-                    </div>
-                    <button id="przycisk-zmien-haslo-wykladowca" class="przycisk-akcja">Potwierdź zmianę</button>
-                </div>
+
 
                 <!-- WYNIKI SZUKANIA SAL -->
                 <div id="kontener-sal" class="hidden odstep-bardzo-duzy">
@@ -177,6 +166,28 @@ function pokazPanelWykladowcy(app) {
                 </table>
             </main>
         </div>
+
+        <!-- MODAL: ZMIANA HASŁA -->
+        <div id="modal-haslo-wykladowca" class="modal-overlay hidden">
+            <div class="modal-content">
+                <button id="modal-haslo-zamknij-wykladowca" class="modal-zamknij">&times;</button>
+                <h3 class="naglowek-maly odstep-maly">Zmiana hasła</h3>
+                <div id="komunikat-haslo-wykladowca" class="blad hidden odstep-maly"></div>
+                <div class="pole">
+                    <input type="password" id="stare-haslo-wykladowca" placeholder="Stare hasło">
+                    <span class="material-symbols-outlined ikona-hasla" onclick="const i=document.getElementById('stare-haslo-wykladowca'); i.type = i.type==='password'?'text':'password'; this.textContent = i.type==='password'?'visibility_off':'visibility';">visibility_off</span>
+                </div>
+                <div class="pole">
+                    <input type="password" id="nowe-haslo-wykladowca" placeholder="Nowe hasło">
+                    <span class="material-symbols-outlined ikona-hasla" onclick="const i=document.getElementById('nowe-haslo-wykladowca'); i.type = i.type==='password'?'text':'password'; this.textContent = i.type==='password'?'visibility_off':'visibility';">visibility_off</span>
+                </div>
+                <div class="pole">
+                    <input type="password" id="powtorz-haslo-wykladowca" placeholder="Powtórz nowe hasło">
+                    <span class="material-symbols-outlined ikona-hasla" onclick="const i=document.getElementById('powtorz-haslo-wykladowca'); i.type = i.type==='password'?'text':'password'; this.textContent = i.type==='password'?'visibility_off':'visibility';">visibility_off</span>
+                </div>
+                <button id="przycisk-zmien-haslo-wykladowca" class="przycisk-akcja">Potwierdź zmianę</button>
+            </div>
+        </div>
     `;
 
     // Przełączanie motywu
@@ -195,8 +206,23 @@ function pokazPanelWykladowcy(app) {
     };
 
     document.getElementById('przycisk-pokaz-haslo-wykladowca').onclick = function() {
-        document.getElementById('sekcja-haslo-wykladowca').classList.toggle('hidden');
+        document.getElementById('modal-haslo-wykladowca').classList.remove('hidden');
     };
+
+    document.getElementById('modal-haslo-zamknij-wykladowca').onclick = zresetujIZamknijModal;
+    document.getElementById('modal-haslo-wykladowca').addEventListener('click', function(e) {
+        if (e.target === this) {
+            zresetujIZamknijModal();
+        }
+    });
+
+    function zresetujIZamknijModal() {
+        document.getElementById('modal-haslo-wykladowca').classList.add('hidden');
+        document.getElementById('stare-haslo-wykladowca').value = '';
+        document.getElementById('nowe-haslo-wykladowca').value = '';
+        document.getElementById('powtorz-haslo-wykladowca').value = '';
+        document.getElementById('komunikat-haslo-wykladowca').classList.add('hidden');
+    }
 
     document.getElementById('przycisk-eksport-csv-wykladowca').onclick = function() {
         if (planZajec.length === 0) {
@@ -227,25 +253,42 @@ function pokazPanelWykladowcy(app) {
     document.getElementById('przycisk-zmien-haslo-wykladowca').onclick = function() {
         var stareHaslo = document.getElementById('stare-haslo-wykladowca').value;
         var noweHaslo = document.getElementById('nowe-haslo-wykladowca').value;
+        var powtorzHaslo = document.getElementById('powtorz-haslo-wykladowca').value;
         var komunikat = document.getElementById('komunikat-haslo-wykladowca');
+
+        komunikat.classList.add('hidden');
+        komunikat.className = 'blad hidden odstep-maly';
+
+        if (!stareHaslo || !noweHaslo || !powtorzHaslo) {
+            komunikat.textContent = 'Wypełnij wszystkie pola.';
+            komunikat.classList.remove('hidden');
+            komunikat.classList.add('tekst-blad');
+            return;
+        }
+
+        if (noweHaslo !== powtorzHaslo) {
+            komunikat.textContent = 'Nowe hasła nie są identyczne.';
+            komunikat.classList.remove('hidden');
+            komunikat.classList.add('tekst-blad');
+            return;
+        }
 
         apiCall('/api/auth/change_password/', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({ old_password: stareHaslo, new_password: noweHaslo })
         })
         .then(dane => {
             komunikat.classList.remove('hidden');
             if (dane.status === 'success') {
-                komunikat.style.color = 'green';
-                komunikat.textContent = 'Hasło zostało zmienione!';
-
+                komunikat.classList.add('tekst-sukces');
+                komunikat.textContent = 'Hasło zostało pomyślnie zmienione!';
+                
+                setTimeout(() => {
+                    zresetujIZamknijModal();
+                }, 1500);
             } else {
-                komunikat.style.color = 'red';
-                komunikat.textContent = dane.message;
-
+                komunikat.classList.add('tekst-blad');
+                komunikat.textContent = dane.message || 'Wystąpił błąd.';
             }
         });
     };

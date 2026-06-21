@@ -15,6 +15,7 @@ function pokazLogowanie(app) {
                 <div class="pole">
                     <label for="pole-haslo">Hasło</label>
                     <input type="password" id="pole-haslo" placeholder="hasło">
+                    <span class="material-symbols-outlined ikona-hasla" onclick="const i=document.getElementById('pole-haslo'); i.type = i.type==='password'?'text':'password'; this.textContent = i.type==='password'?'visibility_off':'visibility';">visibility_off</span>
                 </div>
                 <button id="przycisk-login">Zaloguj się</button>
             </div>

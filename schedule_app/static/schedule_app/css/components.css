@@ -20,6 +20,7 @@
 
 .pole {
     margin-bottom: 16px;
+    position: relative;
 }
 
 .pole label {
@@ -27,6 +28,16 @@
     margin-bottom: 4px;
     font-size: 13px;
     color: var(--text-primary);
+}
+
+.ikona-hasla {
+    position: absolute;
+    right: 12px;
+    bottom: 11px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    user-select: none;
+    font-size: 20px;
 }
 
 .pole input,
@@ -109,7 +120,7 @@ button {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .tabela-planu {
@@ -187,3 +198,51 @@ button {
     color: var(--text-secondary);
 }
 
+
+/* MODAL POPUP */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: var(--bg-page);
+    padding: 30px;
+    border-radius: 8px;
+    width: 360px;
+    max-width: 90%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    position: relative;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-zamknij {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 24px;
+    line-height: 1;
+    padding: 0;
+    width: auto;
+}
+
+.modal-zamknij:hover {
+    color: var(--text-primary);
+}

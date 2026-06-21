@@ -87,19 +87,30 @@ function pokazPanelPlanisty(app) {
                     </div>
                 </div>
 
-                <!-- ZMIANA HASŁA -->
-                <div id="sekcja-haslo-planista" class="content-sekcja hidden odstep-gorny">
-                    <h3 class="naglowek-maly">Zmiana hasła</h3>
-                    <div id="komunikat-haslo" class="blad hidden odstep-sredni"></div>
-                    <div class="pole">
-                        <input type="password" id="stare-haslo" placeholder="Stare hasło">
-                    </div>
-                    <div class="pole">
-                        <input type="password" id="nowe-haslo" placeholder="Nowe hasło">
-                    </div>
-                    <button id="przycisk-zmien-haslo" class="przycisk-akcja">Potwierdź zmianę</button>
-                </div>
+                <!-- Tabela crud -->
             </main>
+        </div>
+
+        <!-- MODAL: ZMIANA HASŁA -->
+        <div id="modal-haslo-planista" class="modal-overlay hidden">
+            <div class="modal-content">
+                <button id="modal-haslo-zamknij-planista" class="modal-zamknij">&times;</button>
+                <h3 class="naglowek-maly odstep-maly">Zmiana hasła</h3>
+                <div id="komunikat-haslo" class="blad hidden odstep-maly"></div>
+                <div class="pole">
+                    <input type="password" id="stare-haslo" placeholder="Stare hasło">
+                    <span class="material-symbols-outlined ikona-hasla" onclick="const i=document.getElementById('stare-haslo'); i.type = i.type==='password'?'text':'password'; this.textContent = i.type==='password'?'visibility_off':'visibility';">visibility_off</span>
+                </div>
+                <div class="pole">
+                    <input type="password" id="nowe-haslo" placeholder="Nowe hasło">
+                    <span class="material-symbols-outlined ikona-hasla" onclick="const i=document.getElementById('nowe-haslo'); i.type = i.type==='password'?'text':'password'; this.textContent = i.type==='password'?'visibility_off':'visibility';">visibility_off</span>
+                </div>
+                <div class="pole">
+                    <input type="password" id="powtorz-haslo" placeholder="Powtórz nowe hasło">
+                    <span class="material-symbols-outlined ikona-hasla" onclick="const i=document.getElementById('powtorz-haslo'); i.type = i.type==='password'?'text':'password'; this.textContent = i.type==='password'?'visibility_off':'visibility';">visibility_off</span>
+                </div>
+                <button id="przycisk-zmien-haslo" class="przycisk-akcja">Potwierdź zmianę</button>
+            </div>
         </div>
     `;
 
@@ -121,20 +132,43 @@ function pokazPanelPlanisty(app) {
 
     przelaczZasobCrud();
 
-    // Przełączanie zmiany hasła
     document.getElementById('przycisk-pokaz-haslo-planista').onclick = function() {
-        document.getElementById('sekcja-haslo-planista').classList.toggle('hidden');
+        document.getElementById('modal-haslo-planista').classList.remove('hidden');
     };
+
+    document.getElementById('modal-haslo-zamknij-planista').onclick = zresetujIZamknijModal;
+    document.getElementById('modal-haslo-planista').addEventListener('click', function(e) {
+        if (e.target === this) {
+            zresetujIZamknijModal();
+        }
+    });
+
+    function zresetujIZamknijModal() {
+        document.getElementById('modal-haslo-planista').classList.add('hidden');
+        document.getElementById('stare-haslo').value = '';
+        document.getElementById('nowe-haslo').value = '';
+        document.getElementById('powtorz-haslo').value = '';
+        document.getElementById('komunikat-haslo').classList.add('hidden');
+    }
 
     document.getElementById('przycisk-zmien-haslo').onclick = function() {
         var stareHaslo = document.getElementById('stare-haslo').value;
         var noweHaslo = document.getElementById('nowe-haslo').value;
+        var powtorzHaslo = document.getElementById('powtorz-haslo').value;
         var komunikat = document.getElementById('komunikat-haslo');
         
         komunikat.classList.add('hidden');
+        komunikat.className = 'blad hidden odstep-maly';
         
-        if (!stareHaslo || !noweHaslo) {
-            komunikat.textContent = 'Wypełnij oba pola.';
+        if (!stareHaslo || !noweHaslo || !powtorzHaslo) {
+            komunikat.textContent = 'Wypełnij wszystkie pola.';
+            komunikat.classList.remove('hidden');
+            komunikat.classList.add('tekst-blad');
+            return;
+        }
+
+        if (noweHaslo !== powtorzHaslo) {
+            komunikat.textContent = 'Nowe hasła nie są identyczne.';
             komunikat.classList.remove('hidden');
             komunikat.classList.add('tekst-blad');
             return;
@@ -147,10 +181,12 @@ function pokazPanelPlanisty(app) {
         .then(dane => {
             komunikat.classList.remove('hidden');
             if (dane.status === 'success') {
-                komunikat.textContent = 'Hasło zostało zmienione!';
                 komunikat.classList.add('tekst-sukces');
-                document.getElementById('stare-haslo').value = '';
-                document.getElementById('nowe-haslo').value = '';
+                komunikat.textContent = 'Hasło zostało pomyślnie zmienione!';
+                
+                setTimeout(() => {
+                    zresetujIZamknijModal();
+                }, 1500);
             } else {
                 komunikat.classList.add('tekst-blad');
                 komunikat.textContent = dane.message || 'Wystąpił błąd.';

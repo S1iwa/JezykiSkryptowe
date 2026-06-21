@@ -87,18 +87,7 @@ function pokazPanelStudenta(app) {
 
             <main class="panel-content">
 
-                <!-- Sekcja zmiany hasła -->
-                <div id="sekcja-haslo" class="content-sekcja hidden odstep-duzy">
-                    <h3 class="naglowek-maly">Zmiana hasła</h3>
-                    <div id="komunikat-haslo" class="blad hidden"></div>
-                    <div class="pole">
-                        <input type="password" id="stare-haslo" placeholder="Stare hasło">
-                    </div>
-                    <div class="pole">
-                        <input type="password" id="nowe-haslo" placeholder="Nowe hasło">
-                    </div>
-                    <button id="przycisk-zmien-haslo" class="przycisk-akcja">Potwierdź zmianę</button>
-                </div>
+
 
                 <!-- Tabela prowadzących – pojawia się po wyszukaniu -->
                 <div id="kontener-prowadzacych" class="hidden odstep-bardzo-duzy">
@@ -134,6 +123,28 @@ function pokazPanelStudenta(app) {
                 </table>
             </main>
         </div>
+
+        <!-- MODAL: ZMIANA HASŁA -->
+        <div id="modal-haslo" class="modal-overlay hidden">
+            <div class="modal-content">
+                <button id="modal-haslo-zamknij" class="modal-zamknij">&times;</button>
+                <h3 class="naglowek-maly odstep-maly">Zmiana hasła</h3>
+                <div id="komunikat-haslo" class="blad hidden odstep-maly"></div>
+                <div class="pole">
+                    <input type="password" id="stare-haslo" placeholder="Stare hasło">
+                    <span class="material-symbols-outlined ikona-hasla" onclick="const i=document.getElementById('stare-haslo'); i.type = i.type==='password'?'text':'password'; this.textContent = i.type==='password'?'visibility_off':'visibility';">visibility_off</span>
+                </div>
+                <div class="pole">
+                    <input type="password" id="nowe-haslo" placeholder="Nowe hasło">
+                    <span class="material-symbols-outlined ikona-hasla" onclick="const i=document.getElementById('nowe-haslo'); i.type = i.type==='password'?'text':'password'; this.textContent = i.type==='password'?'visibility_off':'visibility';">visibility_off</span>
+                </div>
+                <div class="pole">
+                    <input type="password" id="powtorz-haslo" placeholder="Powtórz nowe hasło">
+                    <span class="material-symbols-outlined ikona-hasla" onclick="const i=document.getElementById('powtorz-haslo'); i.type = i.type==='password'?'text':'password'; this.textContent = i.type==='password'?'visibility_off':'visibility';">visibility_off</span>
+                </div>
+                <button id="przycisk-zmien-haslo" class="przycisk-akcja">Potwierdź zmianę</button>
+            </div>
+        </div>
     `;
 
     // Przełączanie motywu
@@ -152,8 +163,23 @@ function pokazPanelStudenta(app) {
     };
 
     document.getElementById('przycisk-pokaz-haslo').onclick = function() {
-        document.getElementById('sekcja-haslo').classList.toggle('hidden');
+        document.getElementById('modal-haslo').classList.remove('hidden');
     };
+
+    document.getElementById('modal-haslo-zamknij').onclick = zresetujIZamknijModal;
+    document.getElementById('modal-haslo').addEventListener('click', function(e) {
+        if (e.target === this) {
+            zresetujIZamknijModal();
+        }
+    });
+
+    function zresetujIZamknijModal() {
+        document.getElementById('modal-haslo').classList.add('hidden');
+        document.getElementById('stare-haslo').value = '';
+        document.getElementById('nowe-haslo').value = '';
+        document.getElementById('powtorz-haslo').value = '';
+        document.getElementById('komunikat-haslo').classList.add('hidden');
+    }
 
     document.getElementById('przycisk-eksport-csv').onclick = function() {
         if (planZajec.length === 0) {
@@ -180,30 +206,43 @@ function pokazPanelStudenta(app) {
     document.getElementById('przycisk-zmien-haslo').onclick = function() {
         var stareHaslo = document.getElementById('stare-haslo').value;
         var noweHaslo = document.getElementById('nowe-haslo').value;
+        var powtorzHaslo = document.getElementById('powtorz-haslo').value;
         var komunikat = document.getElementById('komunikat-haslo');
         
+        komunikat.classList.add('hidden');
+        komunikat.className = 'blad hidden odstep-maly';
+
+        if (!stareHaslo || !noweHaslo || !powtorzHaslo) {
+            komunikat.textContent = 'Wypełnij wszystkie pola.';
+            komunikat.classList.remove('hidden');
+            komunikat.classList.add('tekst-blad');
+            return;
+        }
+
+        if (noweHaslo !== powtorzHaslo) {
+            komunikat.textContent = 'Nowe hasła nie są identyczne.';
+            komunikat.classList.remove('hidden');
+            komunikat.classList.add('tekst-blad');
+            return;
+        }
+
         apiCall('/api/auth/change_password/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ old_password: stareHaslo, new_password: noweHaslo })
         })
         .then(dane => {
             komunikat.classList.remove('hidden');
             if (dane.status === 'success') {
                 komunikat.classList.add('tekst-sukces');
-                komunikat.classList.remove('tekst-blad');
-                komunikat.textContent = 'Hasło zostało zmienione!';
+                komunikat.textContent = 'Hasło zostało pomyślnie zmienione!';
+                
+                setTimeout(() => {
+                    zresetujIZamknijModal();
+                }, 1500);
             } else {
                 komunikat.classList.add('tekst-blad');
-                komunikat.classList.remove('tekst-sukces');
-                komunikat.textContent = dane.message;
+                komunikat.textContent = dane.message || 'Wystąpił błąd.';
             }
-        })
-        .catch(err => {
-            komunikat.classList.remove('hidden');
-            komunikat.classList.remove('tekst-sukces');
-            komunikat.classList.add('tekst-blad');
-            komunikat.textContent = err.message || 'Wystąpił błąd.';
         });
     };
 
