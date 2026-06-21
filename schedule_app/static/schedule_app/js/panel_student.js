@@ -75,10 +75,10 @@ function pokazPanelStudenta(app) {
 
                 <hr class="sidebar-divider">
                 <div class="sidebar-akcje">
-                    <button id="przycisk-motyw-student" class="sidebar-btn motyw">${document.body.classList.contains('dark') ? '☀️ Jasny motyw' : '🌙 Ciemny motyw'}</button>
-                    <button id="przycisk-eksport-csv" class="sidebar-btn">⬇️ Pobierz plan (CSV)</button>
-                    <button id="przycisk-pokaz-haslo" class="sidebar-btn">🔑 Zmień hasło</button>
-                    <button id="przycisk-wyloguj" class="sidebar-btn danger">⬅️ Wyloguj się</button>
+                    <button id="przycisk-motyw-student" class="sidebar-btn motyw">${document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span> Jasny motyw' : '<span class="material-symbols-outlined">dark_mode</span> Ciemny motyw'}</button>
+                    <button id="przycisk-eksport-csv" class="sidebar-btn"><span class="material-symbols-outlined">download</span> Pobierz plan (CSV)</button>
+                    <button id="przycisk-pokaz-haslo" class="sidebar-btn"><span class="material-symbols-outlined">key</span> Zmień hasło</button>
+                    <button id="przycisk-wyloguj" class="sidebar-btn danger"><span class="material-symbols-outlined">logout</span> Wyloguj się</button>
                 </div>
             </aside>
 
@@ -136,7 +136,7 @@ function pokazPanelStudenta(app) {
     // Przełączanie motywu
     document.getElementById('przycisk-motyw-student').onclick = function() {
         toggleMotyw();
-        this.textContent = document.body.classList.contains('dark') ? '☀️ Jasny motyw' : '🌙 Ciemny motyw';
+        this.innerHTML = document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span> Jasny motyw' : '<span class="material-symbols-outlined">dark_mode</span> Ciemny motyw';
     };
 
     document.getElementById('przycisk-wyloguj').onclick = function() {
