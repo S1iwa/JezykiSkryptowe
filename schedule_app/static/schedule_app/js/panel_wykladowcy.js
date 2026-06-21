@@ -1,4 +1,4 @@
-// Funkcja pokazPanelWykladowcy:
+
 function pokazPanelWykladowcy(app) {
     var email = sessionStorage.getItem('email');
     var imie = sessionStorage.getItem('imie');

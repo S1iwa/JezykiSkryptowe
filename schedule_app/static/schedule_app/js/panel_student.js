@@ -226,13 +226,13 @@ function pokazPanelStudenta(app) {
 
         if (!imieVal && !nazwiskoVal) {
             document.getElementById('kontener-prowadzacych').classList.add('hidden');
-            komunikat.style.display = 'none';
+            komunikat.classList.add('hidden');
             tbody.innerHTML = renderujWiersze(planZajec);
             naglowek.textContent = 'Twój plan zajęć';
             return;
         }
 
-        komunikat.style.display = 'none';
+        komunikat.classList.add('hidden');
 
         apiCall(`/api/students/professors-information/?imie=${encodeURIComponent(imieVal)}&nazwisko=${encodeURIComponent(nazwiskoVal)}`)
         .then(dane => {
@@ -274,8 +274,8 @@ function pokazPanelStudenta(app) {
             } else {
                 kontener.classList.add('hidden');
                 komunikat.textContent = dane.message;
-                komunikat.style.color = 'var(--color-error, red)';
-                komunikat.style.display = 'block';
+                komunikat.classList.add('tekst-blad');
+                komunikat.classList.remove('hidden');
                 tbody.innerHTML = renderujWiersze(planZajec);
                 naglowek.textContent = 'Twój plan zajęć';
             }
@@ -283,8 +283,8 @@ function pokazPanelStudenta(app) {
         .catch(() => {
             document.getElementById('kontener-prowadzacych').classList.add('hidden');
             komunikat.textContent = 'Błąd połączenia z serwerem.';
-            komunikat.style.color = 'var(--color-error, red)';
-            komunikat.style.display = 'block';
+            komunikat.classList.add('tekst-blad');
+            komunikat.classList.remove('hidden');
         });
     };
 }

@@ -109,7 +109,7 @@ function pokazPanelPlanisty(app) {
         this.innerHTML = document.body.classList.contains('dark') ? '<span class="material-symbols-outlined">light_mode</span> Jasny motyw' : '<span class="material-symbols-outlined">dark_mode</span> Ciemny motyw';
     };
 
-    // Wylogowanie
+
     document.getElementById('przycisk-wyloguj-planista').onclick = function() {
         apiCall('/api/auth/logout/', { method: 'POST' })
         .then(function() {
@@ -136,7 +136,7 @@ function pokazPanelPlanisty(app) {
         if (!stareHaslo || !noweHaslo) {
             komunikat.textContent = 'Wypełnij oba pola.';
             komunikat.classList.remove('hidden');
-            komunikat.style.color = 'var(--color-error)';
+            komunikat.classList.add('tekst-blad');
             return;
         }
 
@@ -148,7 +148,7 @@ function pokazPanelPlanisty(app) {
             komunikat.classList.remove('hidden');
             if (dane.status === 'success') {
                 komunikat.textContent = 'Hasło zostało zmienione!';
-                komunikat.style.color = 'var(--color-success)';
+                komunikat.classList.add('tekst-sukces');
                 document.getElementById('stare-haslo').value = '';
                 document.getElementById('nowe-haslo').value = '';
             } else {
@@ -168,11 +168,11 @@ function pokazPanelPlanisty(app) {
         else if (zasob === 'grupa') pola = ['rokS', 'sem', 'rokA', 'osoby', 'opis'].map(p => `row-grup-${p}-${id}`);
         else if (zasob === 'zajecia') pola = ['dzien', 'rozp', 'zak', 'uwagi'].map(p => `row-zaj-${p}-${id}`);
 
-        // Odblokowujemy komórki, dodajemy styl i zapisujemy oryginalną wartość
+
         pola.forEach(idPola => {
             var el = document.getElementById(idPola);
             if (el) {
-                // Zapisanie oryginalnego tekstu do atrybutu
+
                 el.setAttribute('data-oryginal', el.textContent.trim());
 
                 el.contentEditable = "true";
@@ -204,7 +204,7 @@ function pokazPanelPlanisty(app) {
         else if (zasob === 'grupa') pola = ['rokS', 'sem', 'rokA', 'osoby', 'opis'].map(p => `row-grup-${p}-${id}`);
         else if (zasob === 'zajecia') pola = ['dzien', 'rozp', 'zak', 'uwagi'].map(p => `row-zaj-${p}-${id}`);
 
-        // Zablokowanie edycji i przywrócenie oryginalnych wartości
+
         pola.forEach(idPola => {
             var el = document.getElementById(idPola);
             if (el) {
@@ -308,14 +308,14 @@ function pokazPanelPlanisty(app) {
         var komunikat = document.getElementById('komunikat-csv');
 
         if (plikInput.files.length === 0) {
-            komunikat.style.color = 'var(--color-error)';
+            komunikat.classList.add('tekst-blad');
             komunikat.textContent = 'Proszę najpierw wybrać plik .csv do załadowania.';
             return;
         }
 
         var formData = new FormData();
         formData.append('file', plikInput.files[0]);
-        komunikat.style.color = 'var(--color-main)';
+        komunikat.classList.add('tekst-sukces');
         komunikat.textContent = 'Przetwarzanie pliku importu...';
 
         apiCall(`/api/data/import/${model}/`, {
@@ -324,7 +324,7 @@ function pokazPanelPlanisty(app) {
         })
         .then(dane => {
             if (dane.status === 'success') {
-                komunikat.style.color = 'var(--color-success)';
+                komunikat.classList.add('tekst-sukces');
                 komunikat.textContent = dane.message;
                 plikInput.value = '';
                 zaladujDaneDoTabeli();
@@ -377,7 +377,7 @@ function pokazPanelPlanisty(app) {
                 <button id="btn-sala-add" class="przycisk-akcja przycisk-sukces odstep-maly">Dodaj obiekt (POST)</button>
             `;
 
-            // Dynamiczne pobranie budynków
+
             uzupelnijWyborCrud('/api/get/budynek/', 'sala-idb', 'budynki', b => `${b.nazwab} (${b.adresb || ''})`);
 
             document.getElementById('btn-sala-add').onclick = function() {
@@ -428,7 +428,7 @@ function pokazPanelPlanisty(app) {
                 <button id="btn-grup-add" class="przycisk-akcja przycisk-sukces odstep-maly">Dodaj obiekt (POST)</button>
             `;
 
-            // Dynamiczne pobranie kierunków
+
             uzupelnijWyborCrud('/api/get/kierunek/', 'grup-idk', 'kierunki', k => `${k.nazwak}`);
 
             document.getElementById('btn-grup-add').onclick = function() {
@@ -470,7 +470,7 @@ function pokazPanelPlanisty(app) {
                 <button id="btn-zaj-add" class="przycisk-akcja przycisk-sukces odstep-maly">Zaplanuj zajęcia (POST)</button>
             `;
 
-            // Pobieranie danych z endpointów
+
             uzupelnijWyborCrud('/api/get/sala/', 'zaj-ids', 'sale', s => `Sala ${s.numers} (${s.typs || 'ogólna'})`);
             uzupelnijWyborCrud('/api/get/subject/', 'zaj-idp', 'przedmioty', p => `${p.nazwap} (${p.formap})`);
             uzupelnijWyborCrud('/api/get/pracownik/', 'zaj-idpr', 'pracownicy', pr => `${pr.stopien || ''} ${pr.imie} ${pr.nazwisko}`);
@@ -494,7 +494,7 @@ function pokazPanelPlanisty(app) {
 
     function wykonajZapytanieCrud(url, metoda, bodyObiekt) {
         var komunikat = document.getElementById('komunikat-crud');
-        komunikat.style.color = 'var(--text-primary)';
+        ;
         komunikat.textContent = 'Trwa komunikacja z serwerem API...';
 
         var options = { method: metoda };
@@ -506,7 +506,7 @@ function pokazPanelPlanisty(app) {
         apiCall(url, options)
         .then(dane => {
             if (dane.status === 'success') {
-                komunikat.style.color = 'var(--color-success)';
+                komunikat.classList.add('tekst-sukces');
                 komunikat.textContent = dane.message + (dane.id ? ` (ID: ${dane.id})` : '');
                 zaladujDaneDoTabeli();
             } else {
