@@ -8,7 +8,7 @@ Projekt ten ma na celu umożliwić sprawne i intuincyjne zarządzanie planami za
 
 ![Student](https://github.com/user-attachments/assets/1b8bb46d-c454-4abd-83fd-ea813420af13)
 
-Student posiada uprawnienia do przeglądania swojego planu, eksportu go do pliku CSV oraz do wyszukania w swoim planie zajęć prowadzonych przez danego prowadzącego.
+Student posiada uprawnienia do przeglądania swojego planu, eksportu go do pliku CSV oraz do wyszukania w swoim planie, zajęć prowadzonych przez danego prowadzącego.
 
 ![Prowadzący](https://github.com/user-attachments/assets/b9c7bf78-2fc7-4661-a512-42ae5d09f28a)
 
