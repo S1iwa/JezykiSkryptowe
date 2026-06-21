@@ -80,7 +80,7 @@ button {
 .przycisk-maly {
     width: auto;
     padding: 8px 16px;
-    background: var(--color-error);
+    background: var(--gray-dark);
     font-size: 14px;
 }
 
