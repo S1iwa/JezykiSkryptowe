@@ -31,11 +31,10 @@ function pokazPanelPlanisty(app) {
             </aside>
 
             <main class="panel-content">
-                <!-- SEKCJA CRUD -->
                 <div id="sekcja-crud">
                     <h2 style="margin-bottom: 20px; font-size: 22px;">Zarządzanie strukturą uczelni (CRUD)</h2>
                     <div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
-                        <!-- Lewa Kolumna: Kontrolki i formularz -->
+                        <!-- Lewa Kolumna -->
                         <div style="flex: 1; min-width: 300px; max-width: 400px;">
                             <div class="pole">
                                 <label><strong>Wybierz obszar zarządzania:</strong></label>
@@ -71,7 +70,7 @@ function pokazPanelPlanisty(app) {
                         <!-- Pionowa kreska rozdzielająca -->
                         <div style="width: 1px; background-color: var(--gray-light); align-self: stretch; min-height: 400px;"></div>
 
-                        <!-- Prawa Kolumna: Tabela wyników -->
+                        <!-- Prawa Kolumna -->
                         <div style="flex: 2; min-width: 400px; overflow-x: auto;">
                             <div id="podglad-danych-kontener" class="hidden">
                                 <h3 id="naglowek-podgladu" style="margin-bottom: 12px;">Aktualna lista</h3>
@@ -87,8 +86,6 @@ function pokazPanelPlanisty(app) {
                         </div>
                     </div>
                 </div>
-
-                <!-- SEKCJA CSV ZOSTALA USUNIETA I PRZENIESIONA DO CRUD -->
 
                 <!-- ZMIANA HASŁA -->
                 <div id="sekcja-haslo-planista" class="content-sekcja hidden" style="margin-top: 30px;">
@@ -122,7 +119,6 @@ function pokazPanelPlanisty(app) {
         });
     };
 
-    // Nawigacja góran została usunięta, ładujemy od razu zawartość.
     przelaczZasobCrud();
 
     // Przełączanie zmiany hasła
@@ -173,7 +169,6 @@ function pokazPanelPlanisty(app) {
         });
     };
 
-    // --- LOGIKA EDYCJI W WIERSZACH ---
     window.odblokujEdycje = function(id) {
         var zasob = document.getElementById('wybierz-zasob-crud').value;
         var pola = [];
@@ -184,7 +179,7 @@ function pokazPanelPlanisty(app) {
         else if (zasob === 'grupa') pola = ['rokS', 'sem', 'rokA', 'osoby', 'opis'].map(p => `row-grup-${p}-${id}`);
         else if (zasob === 'zajecia') pola = ['dzien', 'rozp', 'zak', 'uwagi'].map(p => `row-zaj-${p}-${id}`);
 
-        // Odblokowujemy komórki, dodajemy styl i ZAPISUJEMY oryginalną wartość
+        // Odblokowujemy komórki, dodajemy styl i zapisujemy oryginalną wartość
         pola.forEach(idPola => {
             var el = document.getElementById(idPola);
             if (el) {
@@ -311,7 +306,6 @@ function pokazPanelPlanisty(app) {
         }
     };
 
-    // --- LOGIKA MIGRACJI CSV ---
     document.getElementById('btn-eksport-model').onclick = function() {
         var zasob = document.getElementById('wybierz-zasob-crud').value;
         var mapowanie = { 'subject': 'Przedmioty', 'sala': 'Sale', 'pracownik': 'Pracownicy', 'grupa': 'Grupy', 'zajecia': 'Zajecia' };
@@ -363,10 +357,7 @@ function pokazPanelPlanisty(app) {
         });
     };
 
-    // --- LOGIKA FORMULARZY I OPERACJI CRUD ---
     document.getElementById('wybierz-zasob-crud').onchange = przelaczZasobCrud;
-
-
 
     function przelaczZasobCrud() {
         var zasob = document.getElementById('wybierz-zasob-crud').value;
@@ -376,7 +367,7 @@ function pokazPanelPlanisty(app) {
         document.getElementById('podglad-danych-kontener').classList.remove('hidden');
         zaladujDaneDoTabeli();
 
-        // Wspólny styl dla list rozwijanych pasujący do Twojego szablonu
+        // Wspólny styl dla list rozwijanych
         const selectStyle = "padding: 10px 12px; width: 100%; margin-top: 5px; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--gray-medium); border-radius: 6px; font-family: 'Inter', sans-serif;";
 
         if (zasob === 'subject') {
@@ -501,9 +492,9 @@ function pokazPanelPlanisty(app) {
                 <button id="btn-zaj-add" class="przycisk-akcja" style="background: var(--color-success); margin-top:10px;">Zaplanuj zajęcia (POST)</button>
             `;
 
-            // Pobieranie danych z Twoich istniejących już endpointów API w Django!
+            // Pobieranie danych z endpointów
             uzupelnijWyborCrud('/api/get/sala/', 'zaj-ids', 'sale', s => `Sala ${s.numers} (${s.typs || 'ogólna'})`);
-            uzupelnijWyborCrud('/api/get/subject/', 'zaj-idp', 'subjects', p => `${p.nazwap} (${p.formap})`);
+            uzupelnijWyborCrud('/api/get/subject/', 'zaj-idp', 'przedmioty', p => `${p.nazwap} (${p.formap})`);
             uzupelnijWyborCrud('/api/get/pracownik/', 'zaj-idpr', 'pracownicy', pr => `${pr.stopien || ''} ${pr.imie} ${pr.nazwisko}`);
             uzupelnijWyborCrud('/api/get/grupa/', 'zaj-idg', 'grupy', g => `Semestr ${g.semestr}, Rok ${g.rokstudiow} (${g.opis || 'brak opisu'})`);
 
@@ -582,9 +573,9 @@ function pokazPanelPlanisty(app) {
             if (zasob === 'subject') {
                 naglowekText.textContent = "Aktualna lista przedmiotów";
                 thr.innerHTML = `<th>ID</th><th>Nazwa przedmiotu</th><th>Forma</th><th>Liczba godzin</th><th>Akcje</th>`;
-                if(dane.subjects && dane.subjects.length > 0) {
-                    tbody.innerHTML = dane.subjects.map(s => {
-                        var id = s.id_przedmiotu || s.id;
+                if(dane.przedmioty && dane.przedmioty.length > 0) {
+                    tbody.innerHTML = dane.przedmioty.map(s => {
+                        var id = s.idp || s.id;
                         return `
                         <tr>
                             <td><strong>${id}</strong></td>
@@ -605,7 +596,7 @@ function pokazPanelPlanisty(app) {
                 thr.innerHTML = `<th>ID</th><th>Numer sali</th><th>Typ</th><th>Pojemność</th><th>Akcje</th>`;
                 if(dane.sale && dane.sale.length > 0) {
                     tbody.innerHTML = dane.sale.map(s => {
-                        var id = s.id_sali || s.id;
+                        var id = s.ids || s.id;
                         return `
                         <tr>
                             <td><strong>${id}</strong></td>
@@ -626,7 +617,7 @@ function pokazPanelPlanisty(app) {
                 thr.innerHTML = `<th>ID</th><th>Stopień</th><th>Imię</th><th>Nazwisko</th><th>E-mail</th><th>Telefon</th><th>Rola</th><th>Akcje</th>`;
                 if(dane.pracownicy && dane.pracownicy.length > 0) {
                     tbody.innerHTML = dane.pracownicy.map(p => {
-                        var id = p.id_pracownika || p.id;
+                        var id = p.idpr || p.id;
                         return `
                         <tr>
                             <td><strong>${id}</strong></td>
@@ -650,7 +641,7 @@ function pokazPanelPlanisty(app) {
                 thr.innerHTML = `<th>ID</th><th>Rok studiów</th><th>Semestr</th><th>Rok akademicki</th><th>Liczba osób</th><th>Opis</th><th>Akcje</th>`;
                 if(dane.grupy && dane.grupy.length > 0) {
                     tbody.innerHTML = dane.grupy.map(g => {
-                        var id = g.id_grupy || g.id;
+                        var id = g.idg || g.id;
                         return `
                         <tr>
                             <td><strong>${id}</strong></td>
@@ -710,7 +701,7 @@ function pokazPanelPlanisty(app) {
                 select.innerHTML = '<option value="">-- Wybierz z listy --</option>';
                 dane[kluczDanych].forEach(item => {
                     // Obsługa różnych nazw pól kluczy głównych w bazie
-                    const id = item.id || item.id_sali || item.id_przedmiotu || item.id_pracownika || item.id_grupy || item.idb || item.idk;
+                    const id = item.id || item.ids || item.idp || item.idpr || item.idg || item.idz || item.idb || item.idk;
                     const option = document.createElement('option');
                     option.value = id;
                     option.textContent = formatujNazwe(item);
