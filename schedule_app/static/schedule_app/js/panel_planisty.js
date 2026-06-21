@@ -718,9 +718,8 @@ function pokazPanelPlanisty(app) {
         apiCall(url)
         .then(dane => {
             if (dane.status === 'success' && dane[kluczDanych]) {
-                select.innerHTML = '<option value="">-- Wybierz z listy --</option>';
+                select.innerHTML = '<option value="">Wybierz z listy</option>';
                 dane[kluczDanych].forEach(item => {
-                    // Obsługa różnych nazw pól kluczy głównych w bazie
                     const id = item.id || item.ids || item.idp || item.idpr || item.idg || item.idz || item.idb || item.idk;
                     const option = document.createElement('option');
                     option.value = id;
