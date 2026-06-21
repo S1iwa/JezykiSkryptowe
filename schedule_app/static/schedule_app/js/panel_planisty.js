@@ -409,7 +409,7 @@ function pokazPanelPlanisty(app) {
             `;
 
             // Dynamiczne pobranie budynków
-            uzupelnijWyborCrud('/api/CRUD/budynek/', 'sala-idb', 'budynki', b => `${b.nazwab} (${b.adresb || ''})`);
+            uzupelnijWyborCrud('/api/get/budynek/', 'sala-idb', 'budynki', b => `${b.nazwab} (${b.adresb || ''})`);
 
             document.getElementById('btn-sala-add').onclick = function() {
                 wykonajZapytanieCrud('/api/CRUD/sala/', 'POST', {
@@ -460,7 +460,7 @@ function pokazPanelPlanisty(app) {
             `;
 
             // Dynamiczne pobranie kierunków
-            uzupelnijWyborCrud('/api/CRUD/kierunek/', 'grup-idk', 'kierunki', k => `${k.nazwak}`);
+            uzupelnijWyborCrud('/api/get/kierunek/', 'grup-idk', 'kierunki', k => `${k.nazwak}`);
 
             document.getElementById('btn-grup-add').onclick = function() {
                 wykonajZapytanieCrud('/api/CRUD/grupa/', 'POST', {
@@ -502,10 +502,10 @@ function pokazPanelPlanisty(app) {
             `;
 
             // Pobieranie danych z Twoich istniejących już endpointów API w Django!
-            uzupelnijWyborCrud('/api/CRUD/sala/', 'zaj-ids', 'sale', s => `Sala ${s.numers} (${s.typs || 'ogólna'})`);
-            uzupelnijWyborCrud('/api/CRUD/subject/', 'zaj-idp', 'subjects', p => `${p.nazwap} (${p.formap})`);
-            uzupelnijWyborCrud('/api/CRUD/pracownik/', 'zaj-idpr', 'pracownicy', pr => `${pr.stopien || ''} ${pr.imie} ${pr.nazwisko}`);
-            uzupelnijWyborCrud('/api/CRUD/grupa/', 'zaj-idg', 'grupy', g => `Semestr ${g.semestr}, Rok ${g.rokstudiow} (${g.opis || 'brak opisu'})`);
+            uzupelnijWyborCrud('/api/get/sala/', 'zaj-ids', 'sale', s => `Sala ${s.numers} (${s.typs || 'ogólna'})`);
+            uzupelnijWyborCrud('/api/get/subject/', 'zaj-idp', 'subjects', p => `${p.nazwap} (${p.formap})`);
+            uzupelnijWyborCrud('/api/get/pracownik/', 'zaj-idpr', 'pracownicy', pr => `${pr.stopien || ''} ${pr.imie} ${pr.nazwisko}`);
+            uzupelnijWyborCrud('/api/get/grupa/', 'zaj-idg', 'grupy', g => `Semestr ${g.semestr}, Rok ${g.rokstudiow} (${g.opis || 'brak opisu'})`);
 
             document.getElementById('btn-zaj-add').onclick = function() {
                 wykonajZapytanieCrud('/api/CRUD/zajecia/', 'POST', {
@@ -566,7 +566,7 @@ function pokazPanelPlanisty(app) {
 
         tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color: var(--text-primary);">Ładowanie danych z bazy...</td></tr>';
 
-        fetch(`/api/CRUD/${zasob}/`, { credentials: 'same-origin' })
+        fetch(`/api/get/${zasob}/`, { credentials: 'same-origin' })
         .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, body: data })))
         .then(resObj => {
             let dane = resObj.body;
